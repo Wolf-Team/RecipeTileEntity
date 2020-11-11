@@ -6,12 +6,16 @@
     |_| \_\\___| \___|_| .__/ \___| |_| |_|_|\___||_____|_| |_|\__|_|\__|\__, |
                        |_|                                               |___/                     
                                                                 
-    RecipeTileEntity v3.0 ©WolfTeam ( https://vk.com/wolf___team )
+    RecipeTileEntity v3.0 ©WolfTeam
+    GitHub: https://github.com/Wolf-Team
+            https://github.com/Wolf-Team/RecipeTileEntity
+    VK: https://vk.com/wolf___team
 */
 /*ChangeLog:
     v.3.0
-        - Migrate TypeScript
         - Rename
+        - Migrate TypeScript
+        - Support Multiplayer
     v.2.1
         - Fix errors
         - Shared

@@ -1,0 +1,37 @@
+{
+    "info": {
+        "name": "RecipeTELib",
+        "description": "",
+        "author": "WolfTeam",
+        "version": "1.0",
+        "icon": "icon.png",
+        "api": "CoreEngine"
+    },
+    "resources": [],
+    "sources": [
+        {
+            "source": "dev",
+            "target": "main.js",
+            "type": "main",
+            "language": "typescript"
+        },
+        {
+            "source": "launcher.js",
+            "type": "launcher",
+            "language": "javascript"
+        },
+        {
+            "source": "devlib",
+            "target": "../library/RecipeTileEntityLib.js",
+            "type": "main",
+            "language": "typescript"
+        },
+        {
+            "source": "lib/*",
+            "type": "library",
+            "language": "javascript"
+        }
+    ],
+    "compile": [],
+    "additional": []
+}

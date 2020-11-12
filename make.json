@@ -7,7 +7,13 @@
         "icon": "icon.png",
         "api": "CoreEngine"
     },
-    "resources": [],
+    "resources": [{
+        "path":"assets/res",
+        "type":"resource_directory"
+    },{
+        "path":"assets/gui",
+        "type":"gui"
+    }],
     "sources": [
         {
             "source": "dev",

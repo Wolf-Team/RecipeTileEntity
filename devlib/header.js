@@ -41,7 +41,7 @@
 */
 
 LIBRARY({
-    name: "RecipeTileEntityLib",
+    name: "RecipeTileEntity",
     version: 30,
     api: "CoreEngine",
     shared: true

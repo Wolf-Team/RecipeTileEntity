@@ -1,62 +1,142 @@
-/// <reference path="RecipeTEDev.ts" />
+/// <reference path="Exceptions.ts" />
 
 namespace RecipeTE {
-    var AIR_ITEM: ItemInstance = { id: 0, count: 1, data: 0 };
+    
+    abstract class WorkbenchInfo {
+        public sid: string;
+        public block_sid?: string;
+        public cols: number;
+        public rows?: number;
+        public window: UI.IWindow;
+        public input?: string[] | string;
+        public output?: string;
 
-    export interface WorckbenchInfo {
-        sid: string
-        columns: number
-        rows?: number
-        window?: UI.Window | UI.WindowGroup
-        rv_window?: UI.Window | UI.WindowGroup
-        input?: string[] | string
-        output?: string
-        scale?: string
-        time?: number
-    }
-
-    export interface Worckbench extends TileEntity.TileEntityPrototype {
-        _workbench_info?: WorckbenchInfo
-        condition?: () => boolean
-    }
-
-    export function addWorckbench(worckbench: WorckbenchInfo) {
-        RecipeTEDev.mechanisms[worckbench.sid] = worckbench;
-        worckbench.window.getContent().
-                elements[worckbench.output].isValid = RecipeTEDev.outputSlotValid;
-    }
-
-    export function registerWorkbench(worckbench: WorckbenchInfo, Prototype: Worckbench) {
-        if(!(worckbench.window instanceof UI.Window || worckbench.window instanceof UI.WindowGroup))
-            throw new Error("worckbench.window was been UI.IWindow");
-
-        addWorckbench(worckbench);
-        
-        Prototype._workbench_info = worckbench;
-
-        Prototype.getScreenName = function(){ return "main"; }
-        Prototype.getScreenByName = function(){
-            return worckbench.window;
-        }
-        Prototype.setWorkbench = function (sid) {
-            // if (!RecipeTE.isRegistered(sid))
-            //     throw "Верстак \"" + sid + "\" не зарегистрирован.";
-
-            this._workbench_info = RecipeTEDev.mechanisms[sid];
+        public static getDefaultWorkbenchInfo(workbench: WorkbenchInfo): WorkbenchInfo {
+            workbench.block_sid = workbench.block_sid || workbench.sid;
+            workbench.rows = workbench.rows || 1;
+            workbench.input = workbench.input || "inputSlot";
+            workbench.output = workbench.output || "outputSlot";
+            return workbench;
         }
 
-        TileEntity.registerPrototype(BlockID[worckbench.scale], Prototype)
+        private static workbenches: { [key: string]: WorkbenchInfo } = {}
+        public static isRegistered(sid: string): boolean {
+            return this.workbenches[sid] != undefined;
+        }
+        public static registerWorkbench(workbench: WorkbenchInfo) {
+            if (this.isRegistered(workbench.sid))
+                throw new RegisterException(`Workbench ${workbench.sid} already was been registered.`);
+
+            this.workbenches[workbench.sid] = this.getDefaultWorkbenchInfo(workbench);
+        }
+        public static getWorkbench(sid: string): WorkbenchInfo {
+            if (!this.isRegistered(sid))
+                throw new RegisterException(`Workbench ${sid} not been registered.`);
+
+            return this.workbenches[sid];
+        }
     }
 
-    // export function addWorckbench(sid, Prototype): void { }
-    // export function registerWorkbench(sid, Prototype): void { }
-    // export function isRegistered(sid): void { }
-    // export function addRecipe(sid, result, ingridients, time_multiple, craft): void { }
-    // export function addShapeRecipe(sid, result, recipe, ingridients, time_multiple, craft): void { }
-    // export function getRecipes(sid): void { }
+    interface IWorkbench extends TileEntity.TileEntityPrototype {
+        workbench: WorkbenchInfo;
+        setWorkbench: (sid: string) => void;
+        setWorkbenchInfo: (info: WorkbenchInfo) => void;
+        registerTileEntity: () => void;
 
-    // function defaultCraftFunction(): void { }
-    // export function getDefaultCraftFunction(): Function {
-    //     return defaultCraftFunction;
-    // }
+        setEnable: (active: boolean) => void;
+        isEnabled: () => boolean;
+    }
+
+    export abstract class WorkbenchBase implements IWorkbench {
+        public useNetworkItemContainer: boolean = true;
+        public workbench: WorkbenchInfo;
+        public container: ItemContainer;
+        private enable: boolean = true;
+
+        constructor(info?: WorkbenchInfo) {
+            if (info) {
+                if (!WorkbenchInfo.isRegistered(info.sid))
+                    WorkbenchInfo.registerWorkbench(info);
+
+                this.setWorkbenchInfo(info);
+            }
+        }
+
+        public setWorkbench(sid: string) {
+            this.workbench = WorkbenchInfo.getWorkbench(sid);
+        }
+        public setWorkbenchInfo(info: WorkbenchInfo) {
+            if (!WorkbenchInfo.isRegistered(info.sid))
+                throw new RegisterException(`Workbench ${info.sid} was not been registered.`);
+
+            this.workbench = info;
+        }
+
+        public registerTileEntity() {
+            TileEntity.registerPrototype(BlockID[this.workbench.block_sid], this)
+        }
+
+        public isEnabled() { return this.enable; }
+
+        public setEnable(active: boolean) {
+            this.enable = active;
+        }
+
+        //TileEntity
+        public init() {
+            print("Init")
+            this.container.setGlobalAddTransferPolicy(function (container, name, id, amount) {
+                print(`Add ${name} - ${amount}`)
+                return amount;
+            });
+            this.container.setGlobalGetTransferPolicy(function (container, name, id, amount) {
+                print(`Get ${name} - ${amount}`)
+                return amount;
+            })
+        }
+        public getScreenByName(name: string) {
+            return this.workbench.window;
+        }
+        public getScreenName() { return "main"; }
+    }
+
+    export class Workbench extends WorkbenchBase { }
+
+    function registerDefaultTileEntity(workbench: WorkbenchInfo, tile: TileEntity.TileEntityPrototype) {
+        tile.setWorkbench = function (sid: string) {
+            this.workbench = WorkbenchInfo.getWorkbench(sid);
+        }
+        tile.setWorkbenchInfo = function (info: WorkbenchInfo) {
+            if (!WorkbenchInfo.isRegistered(info.sid))
+                throw new RegisterException(`Workbench ${info.sid} was not been registered.`);
+
+            this.workbench = info;
+        }
+        tile.setWorkbenchInfo(workbench);
+        tile.isEnabled = function () { return this.enable; }
+
+        tile.setEnable = function (active: boolean) {
+            this.enable = active;
+        }
+
+        TileEntity.registerPrototype(BlockID[workbench.block_sid], tile);
+    }
+    export function registerWorkbench(workbench: WorkbenchInfo, tile: TileEntity.TileEntityPrototype) {
+        WorkbenchInfo.registerWorkbench(workbench);
+        if (tile instanceof WorkbenchBase) {
+            print("Rregister")
+            tile.setWorkbenchInfo(workbench)
+            tile.registerTileEntity();
+        } else {
+            print("Rregister2")
+            registerDefaultTileEntity(workbench, () => {
+                tile.click = function () {
+                    Debug.message(this.getScreenName);
+                }
+                return tile
+            })
+
+        }
+
+    }
 }

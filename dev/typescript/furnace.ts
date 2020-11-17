@@ -1,5 +1,3 @@
-/// <reference path="../devlib/api/RecipeTE.ts" />
-
 IDRegistry.genBlockID("Furnace");
 Block.createBlockWithRotation("Furnace", [{
     name: "Furnace",
@@ -45,25 +43,25 @@ var Furnace = new UI.StandartWindow({
     }
 });
 
-RecipeTE.registerWorkbench({
-    sid:"Furnace",
-    time: 5 * 20, //Время крафта
-    columns: 1, //Кол-во слотов
-    window: Furnace, //Интерфейс печи
-    input: ["myInputSlot"], //Входные слоты
-    output: "myOutputSlot", //Слот результата
-    scale: "timerScale", //Шкала прогресса
-}, {
-    condition: function () { //Условие работы верстака
-        return this.data.power
-    },
-    defaultValues: {
-        power: false,
-    },
-    redstone: function (params) {
-        if (params.power < 10)
-            this.data.power = false;
-        else
-            this.data.power = true;
-    }
-});
+// RecipeTE.registerWorkbench({
+//     sid:"Furnace",
+//     time: 5 * 20, //Время крафта
+//     columns: 1, //Кол-во слотов
+//     window: Furnace, //Интерфейс печи
+//     input: ["myInputSlot"], //Входные слоты
+//     output: "myOutputSlot", //Слот результата
+//     scale: "timerScale", //Шкала прогресса
+// }, {
+//     condition: function () { //Условие работы верстака
+//         return this.data.power
+//     },
+//     defaultValues: {
+//         power: false,
+//     },
+//     redstone: function (params) {
+//         if (params.power < 10)
+//             this.data.power = false;
+//         else
+//             this.data.power = true;
+//     }
+// });

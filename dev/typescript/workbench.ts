@@ -1,5 +1,3 @@
-/// <reference path="../devlib/api/RecipeTE.ts" />
-
 IDRegistry.genBlockID("Workbench_Grid");
 Block.createBlock("Workbench_Grid", [{
     name: "Workbench Grid", 
@@ -55,11 +53,25 @@ var Workbench_Grid: UI.StandardWindow = new UI.StandardWindow({
     }
 });
 
+
+class MyWorkbench extends RecipeTE.Workbench{}
+
+//.
+//addRecipe();
+let myWorkbench = new MyWorkbench();
+
+alert(myWorkbench.init);
+
 RecipeTE.registerWorkbench({
     sid:"Workbench_Grid",
-    columns:4,
+    cols:4,
     rows:4,
     window:Workbench_Grid
-}, {
+}, myWorkbench);
 
-});
+// RecipeTE.registerWorkbench({
+//     sid:"Workbench_Grid",
+//     columns:4,
+//     rows:4,
+//     window:Workbench_Grid
+// }, new RecipeTE.Workbench());

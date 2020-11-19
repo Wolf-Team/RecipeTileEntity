@@ -56,18 +56,13 @@ var Workbench_Grid: UI.StandardWindow = new UI.StandardWindow({
 
 class MyWorkbench extends RecipeTE.Workbench{}
 
-//.
-//addRecipe();
-let myWorkbench = new MyWorkbench();
-
-alert(myWorkbench.init);
-
-RecipeTE.registerWorkbench({
+new MyWorkbench({
     sid:"Workbench_Grid",
-    cols:4,
+    columns:4,
     rows:4,
     window:Workbench_Grid
-}, myWorkbench);
+})
+//.addRecipe();
 
 // RecipeTE.registerWorkbench({
 //     sid:"Workbench_Grid",

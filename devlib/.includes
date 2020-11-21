@@ -1,6 +1,6 @@
 header.js
 
 api/*.ts
-
+!api/*.dev.ts
 
 footer.js

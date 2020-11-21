@@ -1,0 +1,114 @@
+/// <reference path="Errors.ts" />
+
+namespace RecipeTE {
+    type WorkbenchList = { [sID: string]: Workbench };
+    type IngredientsList = { [char_mask: string]: ItemInstance };
+
+    type WorkbenchInfo = {
+        window: UI.IWindow;
+        columns: number;
+        rows?: number;
+        input?: string[] | string;
+        output?: string;
+    }
+
+    type Recipe = {
+        result: ItemInstance;
+        mask: string[];
+        ingredients: IngredientsList;
+    }
+
+    export class Workbench implements WorkbenchInfo {
+        private sID: string;
+        private _window: UI.IWindow;
+        private _columns: number;
+        private _rows: number = 1;
+        private _input: string[] | string = "inputSlot";
+        private _output: string = "outputSlot";
+        private recipes: Recipe[] = [];
+
+        get countSlot(): number {
+            return this._columns * this._rows;
+        }
+        get window(): UI.IWindow {
+            return this._window;
+        }
+        get columns(): number {
+            return this._columns;
+        }
+        get rows(): number {
+            return this._rows;
+        }
+        get input(): string[] | string {
+            return this._input;
+        }
+        get output(): string {
+            return this._output;
+        }
+
+        constructor(sID: string, info: WorkbenchInfo) {
+            this.sID = sID;
+            this._window = info.window;
+
+            if (info.columns < 1)
+                throw new RangeError(`"info.columns" must be > 0.`);
+            this._columns = info.columns;
+
+            if (info.rows != undefined) {
+                if (info.rows < 1)
+                    throw new RangeError(`"info.rows" must be > 0.`);
+
+                this._rows = info.rows || 1;
+            }
+
+            if (info.input) {
+                if (Array.isArray(info.input) && info.input.length != this.countSlot)
+                    throw new RangeError(`Length "info.input" mast be = ${this.countSlot}(columns * rows).`);
+
+                this._input = info.input;
+            }
+
+            if (info.output != undefined)
+                this._output = info.output;
+
+            //window.getContent().elements
+        }
+
+        public addRecipe(result: ItemInstance, mask: string[], ingredients: IngredientsList): Workbench {
+            
+            return this;
+        }
+
+        public toString(): string {
+            return this.sID;
+        }
+
+        private static workbenches: WorkbenchList = {};
+        public static isRegister(workbench: Workbench | string): boolean {
+            if (workbench instanceof Workbench)
+                workbench = workbench.sID;
+
+            return this.workbenches[workbench] != undefined;
+        }
+        public static registerWorkbench(workbench: Workbench): void {
+            if (this.isRegister(workbench))
+                throw new RegisterError(`Workbench with sID "${workbench.sID}" already has been registered.`);
+
+            this.workbenches[workbench.sID] = workbench;
+        }
+        public static getWorkbench(sID: string): Workbench {
+            if (!this.isRegister(sID))
+                throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);
+
+            return this.workbenches[sID];
+        }
+    }
+
+    export var isRegister = Workbench.isRegister;
+    export function registerWorkbench(sID: string, info: WorkbenchInfo): Workbench {
+        let workbench = new Workbench(sID, info);
+        Workbench.registerWorkbench(workbench);
+        return workbench;
+    }
+}
+//throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);

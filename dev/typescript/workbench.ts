@@ -54,10 +54,14 @@ var Workbench_Grid: UI.StandardWindow = new UI.StandardWindow({
 });
 
 RecipeTE.registerWorkbench("customWorkbench", {
-    window:Workbench_Grid,
-    columns:4,
-    rows:4
-});
+    window: Workbench_Grid,
+    columns: 4,
+    rows: 4
+}).addRecipe({ id: 280, count: 1 }, [
+    "aa",
+    "aa"
+], { a: { id: 5 } });
+
 RecipeTE.registerTileEntity(BlockID["Workbench_Grid"], new RecipeTE.WorkbenchTileEntity("customWorkbench"))
 //RecipeTE.registerWorkbench("customWorkbench", Workbench_Grid, 4, 4)
 //.addRecipe(/*...*/)

@@ -208,5 +208,4 @@ namespace RecipeTE {
             prototype.registerTileEntity(BlockID);
 
     }
-    //WorkbenchTileEntity
 }

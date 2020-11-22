@@ -219,5 +219,8 @@ namespace RecipeTE {
         Workbench.registerWorkbench(workbench);
         return workbench;
     }
+    export function addRecipe(sID:string, result:RecipeItem, mask:string[]|string, ingredients:IngredientsList, craft?:CraftFunction){
+        Workbench.getWorkbench(sID).addRecipe(result, mask, ingredients, craft)
+    }
 }
 //throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);

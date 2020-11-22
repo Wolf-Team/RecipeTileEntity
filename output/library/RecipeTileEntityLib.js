@@ -1,16 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 /*
      ____             _            _____ _ _       _____       _   _ _
     |  _ \  ___   ___(_)_ __   ___|_   _(_) | ___ | ____|_ __ | |_(_) |_ _   _
@@ -58,6 +45,19 @@ LIBRARY({
     api: "CoreEngine",
     shared: true
 });
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var RecipeTE;
 (function (RecipeTE) {
     var RegisterError = /** @class */ (function (_super) {
@@ -257,6 +257,10 @@ var RecipeTE;
         return workbench;
     }
     RecipeTE.registerWorkbench = registerWorkbench;
+    function addRecipe(sID, result, mask, ingredients, craft) {
+        Workbench.getWorkbench(sID).addRecipe(result, mask, ingredients, craft);
+    }
+    RecipeTE.addRecipe = addRecipe;
 })(RecipeTE || (RecipeTE = {}));
 //throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);
 var RecipeTE;
@@ -429,6 +433,5 @@ var RecipeTE;
             prototype.registerTileEntity(BlockID);
     }
     RecipeTE.registerTileEntity = registerTileEntity;
-    //WorkbenchTileEntity
 })(RecipeTE || (RecipeTE = {}));
 EXPORT("RecipeTE", RecipeTE);

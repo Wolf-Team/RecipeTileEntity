@@ -56,7 +56,7 @@ declare namespace RecipeTE {
     }
     export var isRegister: typeof Workbench.isRegister;
     export function registerWorkbench(sID: string, info: WorkbenchInfo): Workbench;
-    export {};
+    export function addRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction): void;
 }
 declare namespace RecipeTE {
     interface WorkbenchPrototype extends TileEntity.TileEntityPrototype {

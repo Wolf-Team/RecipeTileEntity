@@ -1,41 +1,12 @@
 /// <reference path="Errors.ts" />
 
 namespace RecipeTE {
-    type WorkbenchList = { [sID: string]: Workbench };
     export type RecipeItem = { id: number; count?: number; data?: number; }
-    type IngredientsList = { [char_mask: string]: RecipeItem };
-
-    type WorkbenchInfo = {
-        window: UI.IWindow;
-        columns: number;
-        rows?: number;
-        input?: string[] | string;
-        output?: string;
-    }
+    export type IngredientsList = { [char_mask: string]: RecipeItem };
 
     interface CraftFunction {
         (container: ItemContainer, workbench: Workbench, tileEntity: WorkbenchPrototype): void;
     }
-
-    function defaultCraftFunction(container: ItemContainer, workbench: Workbench) {
-        for (var i = 0; i < workbench.countSlot; i++) {
-            var input_slot_name: string;
-            if (Array.isArray(workbench.input))
-                input_slot_name = workbench.input[i]
-            else
-                input_slot_name = workbench.input + i;
-
-            var slot: ItemInstance = container.getSlot(input_slot_name);
-            if (slot.count > 0) {
-                slot.count--;
-
-                if (slot.count == 0)
-                    slot.data = slot.id = slot.count;
-            }
-            container.setSlot(input_slot_name, slot.id, slot.count, slot.data, slot.extra);
-        }
-    }
-
     export type Recipe = {
         result: RecipeItem;
         mask: string[] | string;
@@ -44,6 +15,15 @@ namespace RecipeTE {
     }
 
     export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
+
+    type WorkbenchList = { [sID: string]: Workbench };
+    type WorkbenchInfo = {
+        window: UI.IWindow;
+        columns: number;
+        rows?: number;
+        input?: string[] | string;
+        output?: string;
+    }
 
     export class Workbench implements WorkbenchInfo {
         private sID: string;
@@ -170,6 +150,7 @@ namespace RecipeTE {
             this.recipes.push(recipe)
             return this;
         }
+        
         public getRecipes(): Recipe[] {
             return this.recipes;
         }
@@ -210,6 +191,25 @@ namespace RecipeTE {
                 throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);
 
             return this.workbenches[sID];
+        }
+    }
+
+    function defaultCraftFunction(container: ItemContainer, workbench: Workbench) {
+        for (var i = 0; i < workbench.countSlot; i++) {
+            var input_slot_name: string;
+            if (Array.isArray(workbench.input))
+                input_slot_name = workbench.input[i]
+            else
+                input_slot_name = workbench.input + i;
+
+            var slot: ItemInstance = container.getSlot(input_slot_name);
+            if (slot.count > 0) {
+                slot.count--;
+
+                if (slot.count == 0)
+                    slot.data = slot.id = slot.count;
+            }
+            container.setSlot(input_slot_name, slot.id, slot.count, slot.data, slot.extra);
         }
     }
 

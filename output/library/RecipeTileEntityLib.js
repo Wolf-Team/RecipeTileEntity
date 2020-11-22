@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 /*
      ____             _            _____ _ _       _____       _   _ _
     |  _ \  ___   ___(_)_ __   ___|_   _(_) | ___ | ____|_ __ | |_(_) |_ _   _
@@ -45,19 +58,6 @@ LIBRARY({
     api: "CoreEngine",
     shared: true
 });
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var RecipeTE;
 (function (RecipeTE) {
     var RegisterError = /** @class */ (function (_super) {
@@ -72,22 +72,6 @@ var RecipeTE;
 /// <reference path="Errors.ts" />
 var RecipeTE;
 (function (RecipeTE) {
-    function defaultCraftFunction(container, workbench) {
-        for (var i = 0; i < workbench.countSlot; i++) {
-            var input_slot_name;
-            if (Array.isArray(workbench.input))
-                input_slot_name = workbench.input[i];
-            else
-                input_slot_name = workbench.input + i;
-            var slot = container.getSlot(input_slot_name);
-            if (slot.count > 0) {
-                slot.count--;
-                if (slot.count == 0)
-                    slot.data = slot.id = slot.count;
-            }
-            container.setSlot(input_slot_name, slot.id, slot.count, slot.data, slot.extra);
-        }
-    }
     RecipeTE.AIR_ITEM = { id: 0, count: 0 };
     var Workbench = /** @class */ (function () {
         function Workbench(sID, info) {
@@ -250,6 +234,22 @@ var RecipeTE;
         return Workbench;
     }());
     RecipeTE.Workbench = Workbench;
+    function defaultCraftFunction(container, workbench) {
+        for (var i = 0; i < workbench.countSlot; i++) {
+            var input_slot_name;
+            if (Array.isArray(workbench.input))
+                input_slot_name = workbench.input[i];
+            else
+                input_slot_name = workbench.input + i;
+            var slot = container.getSlot(input_slot_name);
+            if (slot.count > 0) {
+                slot.count--;
+                if (slot.count == 0)
+                    slot.data = slot.id = slot.count;
+            }
+            container.setSlot(input_slot_name, slot.id, slot.count, slot.data, slot.extra);
+        }
+    }
     RecipeTE.isRegister = Workbench.isRegister;
     function registerWorkbench(sID, info) {
         var workbench = new Workbench(sID, info);
@@ -389,6 +389,32 @@ var RecipeTE;
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+                else {
+                    var iLength = _this.workbench.countSlot - recipe.mask.length, iOffset = 0;
+                    for (var i = 0; i < _this.workbench.countSlot; i++) {
+                        if (i > iLength && !select)
+                            return false;
+                        var input = inputs[i];
+                        if (!select) {
+                            var ingredient = recipe.ingredients[recipe.mask[0]];
+                            if (input.id == ingredient.id) {
+                                iOffset = i;
+                                select = true;
+                            }
+                            else if (input.id != 0) {
+                                return false;
+                            }
+                        }
+                        else {
+                            var ingredient = RecipeTE.AIR_ITEM;
+                            var col = recipe.mask[i - iOffset];
+                            if (col)
+                                ingredient = recipe.ingredients[col];
+                            if (input.id != ingredient.id)
+                                return false;
                         }
                     }
                 }

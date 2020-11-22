@@ -158,6 +158,31 @@ namespace RecipeTE {
                             }
                         }
                     }
+                }else{
+                    let iLength:number = this.workbench.countSlot-recipe.mask.length,
+                        iOffset:number = 0;
+                    for(let i = 0; i < this.workbench.countSlot; i++){
+                        if (i > iLength && !select) return false;
+
+                        let input = inputs[i];
+                        if(!select){
+                            let ingredient = recipe.ingredients[recipe.mask[0]];
+                            if (input.id == ingredient.id) {
+                                iOffset = i;
+                                select = true;
+                            } else if (input.id != 0) {
+                                return false;
+                            }
+                        }else{
+                            let ingredient = AIR_ITEM;
+                            let col = recipe.mask[i - iOffset];
+                            if(col)
+                                ingredient = recipe.ingredients[col];
+                                
+                            if (input.id != ingredient.id)
+                                return false;
+                        }
+                    }
                 }
                 
                 return select;

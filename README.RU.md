@@ -39,6 +39,13 @@ RecipeTE.addShapeRecipe("Workbench_Grid", { id: 280, count: 1 }, [
 ], { a: { id: 5 } });
 RecipeTE.addRecipe("Workbench_Grid", {id:2}, [{id:5,count:3}]);
 ```
+
+# Регистрация TileEntity
+Для регистрации TileEntity используется метод RecipeTE.registerTileEntity(BlockID, WorkbenchPrototype);
+```js
+RecipeTE.registerTileEntity(BlockID["Workbench_Grid"], new RecipeTE.WorkbenchTileEntity("customWorkbench"))
+```
+
  
 ## Старые версии
 * [RecipeTileEntityLib 2.1](https://github.com/Wolf-Team/Libraries/blob/master/RecipeTileEntityLib.js)

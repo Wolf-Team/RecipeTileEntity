@@ -184,7 +184,30 @@ namespace RecipeTE {
                         }
                     }
                 }else{
+                    let currentRecipe = {};
                     
+                    for(let i = this.workbench.countSlot-1;i>=0;i--){
+                        let input = inputs[i];
+
+                        if(recipe.ingredients[`${input.id}:${input.data}`]){
+                            if(!currentRecipe[`${input.id}:${input.data}`])
+                                currentRecipe[`${input.id}:${input.data}`] = 0;
+                            
+                            currentRecipe[`${input.id}:${input.data}`]++;
+                        }else if(recipe.ingredients[`${input.id}:-1`]){
+                            if(!currentRecipe[`${input.id}:-1`])
+                                currentRecipe[`${input.id}:-1`] = 0;
+                            
+                            currentRecipe[`${input.id}:-1`]++;
+                        }else if(input.id != 0)
+                            return false;
+                    }
+
+                    for(let i in currentRecipe)
+                        if(recipe.ingredients[i].count != currentRecipe[i])
+                            return false;
+                    
+                    return true;
                 }
 
                 return select;

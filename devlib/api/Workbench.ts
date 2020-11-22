@@ -10,9 +10,10 @@ namespace RecipeTE {
     export type Recipe = {
         result: RecipeItem;
         mask: string[] | string;
-        ingredients: IngredientsList | RecipeItem[];
+        ingredients: IngredientsList;
         craft: CraftFunction
     }
+    
 
     export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
 
@@ -91,11 +92,17 @@ namespace RecipeTE {
             if (result.count === undefined) result.count = 1;
             if (result.data === undefined) result.data = 0;
 
-            if (ingredients[0].count === undefined)
-                ingredients[0].count = 1;
-            if (ingredients[0].data === undefined)
-                ingredients[0].data = -1;
-            let count: number = ingredients[0].count;
+            let count: number = 0;
+            let outputIngredients:IngredientsList = {};
+            ingredients.forEach((item)=>{
+                if (item.count === undefined)
+                    item.count = 1;
+                if (item.data === undefined)
+                    item.data = -1;
+                
+                count += item.count;
+                outputIngredients[`${item.id}:${item.data}`] = item;
+            })
 
             for (let i = ingredients.length - 1; i >= 1; i--) {
                 if (ingredients[i].count === undefined)
@@ -112,10 +119,10 @@ namespace RecipeTE {
             var recipe: Recipe = {
                 result: result,
                 mask: null,
-                ingredients: ingredients,
+                ingredients: outputIngredients,
                 craft: craftFunction || defaultCraftFunction
             };
-
+            
             this.recipes.push(recipe)
 
             return this;

@@ -1,4 +1,44 @@
-# RecipeTELib
+# RecipeTileEntity 3.0
+RecipeTileEntity - библиотека, упрощающая создание верстаков и печей.
+
+[en](https://github.com/Wolf-Team/RecipeTileEntity/blob/main/README.md) | **ru**
+
+# Начать
+Перед началом работы, требуется импортировать библиотеку.
+``` js
+IMPORT("RecipeTileEntity", "*"); // Импортировать все модули
+```
+
+# Регистрация верстака
+Для регистрации верстаков используется метод RecipeTE.registerWorkbench(sID, WorkbenchInfo);
+```
+WorkbenchInfo = {
+    window:UI.IWindow, - Окно верстака
+    columns: number, - Количество столбцов
+    rows?:number = 1, - Количество строк
+    input?:string[]|string = "inputSlot", - Имена входных слотов*
+    output?:string = "outputSlot - Имя выходного слота
+}
+```
+**\* Если строка, то имя фрормируется по формуле input+I, где I - порядковый номер от нуля**
+
+```js
+RecipeTE.registerWorkbench("customWorkbench", {
+    window: Workbench_Grid,
+    columns: 4,
+    rows: 4
+});
+```
+
+# Регистрация рецептов
+Для регистрации рецептов используются методы RecipeTE.addRecipe и RecipeTE.addShapeRecipe
+```js
+RecipeTE.addShapeRecipe("Workbench_Grid", { id: 280, count: 1 }, [
+    "aa",
+    "aa"
+], { a: { id: 5 } });
+RecipeTE.addRecipe("Workbench_Grid", {id:2}, [{id:5,count:3}]);
+```
  
 ## Старые версии
 * [RecipeTileEntityLib 2.1](https://github.com/Wolf-Team/Libraries/blob/master/RecipeTileEntityLib.js)

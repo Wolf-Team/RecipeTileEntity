@@ -1,16 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 /*
      ____             _            _____ _ _       _____       _   _ _
     |  _ \  ___   ___(_)_ __   ___|_   _(_) | ___ | ____|_ __ | |_(_) |_ _   _
@@ -58,6 +45,19 @@ LIBRARY({
     api: "CoreEngine",
     shared: true
 });
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var RecipeTE;
 (function (RecipeTE) {
     var RegisterError = /** @class */ (function (_super) {
@@ -148,7 +148,44 @@ var RecipeTE;
             enumerable: false,
             configurable: true
         });
-        Workbench.prototype.addRecipe = function (result, mask, ingredients, craftFunction) {
+        Workbench.prototype.addRecipe = function (result, ingredients, craftFunction) {
+            if (result.count === undefined)
+                result.count = 1;
+            if (result.data === undefined)
+                result.data = 0;
+            var count = 0;
+            var outputIngredients = {};
+            ingredients.forEach(function (item) {
+                if (item.count === undefined)
+                    item.count = 1;
+                if (item.data === undefined)
+                    item.data = -1;
+                count += item.count;
+                outputIngredients[item.id + ":" + item.data] = item;
+            });
+            for (var i = ingredients.length - 1; i >= 1; i--) {
+                if (ingredients[i].count === undefined)
+                    ingredients[i].count = 1;
+                if (ingredients[i].data === undefined)
+                    ingredients[i].data = -1;
+                count += ingredients[i].count;
+            }
+            if (count > this.countSlot)
+                throw new RangeError("Ingredients must be <= " + this.countSlot);
+            var recipe = {
+                result: result,
+                mask: null,
+                ingredients: outputIngredients,
+                craft: craftFunction || defaultCraftFunction
+            };
+            this.recipes.push(recipe);
+            return this;
+        };
+        Workbench.prototype.addShapeRecipe = function (result, mask, ingredients, craftFunction) {
+            if (result.count === undefined)
+                result.count = 1;
+            if (result.data === undefined)
+                result.data = 0;
             var length = mask.length;
             if (ingredients["#"])
                 throw new SyntaxError("Ingredient cannot be registered to char #");
@@ -192,10 +229,8 @@ var RecipeTE;
                 result: result,
                 mask: mask,
                 ingredients: ingredients,
-                craft: defaultCraftFunction
+                craft: craftFunction || defaultCraftFunction
             };
-            if (craftFunction)
-                recipe.craft = craftFunction;
             this.recipes.push(recipe);
             return this;
         };
@@ -257,10 +292,14 @@ var RecipeTE;
         return workbench;
     }
     RecipeTE.registerWorkbench = registerWorkbench;
-    function addRecipe(sID, result, mask, ingredients, craft) {
-        Workbench.getWorkbench(sID).addRecipe(result, mask, ingredients, craft);
+    function addRecipe(sID, result, ingredients, craft) {
+        Workbench.getWorkbench(sID).addRecipe(result, ingredients, craft);
     }
     RecipeTE.addRecipe = addRecipe;
+    function addShapeRecipe(sID, result, mask, ingredients, craft) {
+        Workbench.getWorkbench(sID).addShapeRecipe(result, mask, ingredients, craft);
+    }
+    RecipeTE.addShapeRecipe = addShapeRecipe;
 })(RecipeTE || (RecipeTE = {}));
 //throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);
 var RecipeTE;
@@ -392,7 +431,7 @@ var RecipeTE;
                         }
                     }
                 }
-                else {
+                else if (recipe.mask) {
                     var iLength = _this.workbench.countSlot - recipe.mask.length, iOffset = 0;
                     for (var i = 0; i < _this.workbench.countSlot; i++) {
                         if (i > iLength && !select)
@@ -417,6 +456,28 @@ var RecipeTE;
                                 return false;
                         }
                     }
+                }
+                else {
+                    var currentRecipe = {};
+                    for (var i = _this.workbench.countSlot - 1; i >= 0; i--) {
+                        var input = inputs[i];
+                        if (recipe.ingredients[input.id + ":" + input.data]) {
+                            if (!currentRecipe[input.id + ":" + input.data])
+                                currentRecipe[input.id + ":" + input.data] = 0;
+                            currentRecipe[input.id + ":" + input.data]++;
+                        }
+                        else if (recipe.ingredients[input.id + ":-1"]) {
+                            if (!currentRecipe[input.id + ":-1"])
+                                currentRecipe[input.id + ":-1"] = 0;
+                            currentRecipe[input.id + ":-1"]++;
+                        }
+                        else if (input.id != 0)
+                            return false;
+                    }
+                    for (var i in currentRecipe)
+                        if (recipe.ingredients[i].count != currentRecipe[i])
+                            return false;
+                    return true;
                 }
                 return select;
             }, this);

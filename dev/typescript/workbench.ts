@@ -65,27 +65,3 @@ RecipeTE.registerWorkbench("customWorkbench", {
 .addRecipe({id:2}, [{id:5,count:3}]);
 
 RecipeTE.registerTileEntity(BlockID["Workbench_Grid"], new RecipeTE.WorkbenchTileEntity("customWorkbench"))
-//RecipeTE.registerWorkbench("customWorkbench", Workbench_Grid, 4, 4)
-//.addRecipe(/*...*/)
-//.addRecipe(/*...*/);
-
-//RecipeTE.registerTileEntity(BlockID["customWorkbench"], new WorkbenchTileEntity("customWorkbench"));
-
-
-
-//class MyWorkbench extends RecipeTE.Workbench{}
-
-// new MyWorkbench({
-//     sid:"Workbench_Grid",
-//     columns:4,
-//     rows:4,
-//     window:Workbench_Grid
-// })
-//.addRecipe();
-
-// RecipeTE.registerWorkbench({
-//     sid:"Workbench_Grid",
-//     columns:4,
-//     rows:4,
-//     window:Workbench_Grid
-// }, new RecipeTE.Workbench());

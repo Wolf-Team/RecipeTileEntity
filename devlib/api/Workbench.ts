@@ -2,7 +2,7 @@
 
 namespace RecipeTE {
     type WorkbenchList = { [sID: string]: Workbench };
-    type RecipeItem = { id:number; count?:number; data?:number; }
+    export type RecipeItem = { id: number; count?: number; data?: number; }
     type IngredientsList = { [char_mask: string]: RecipeItem };
 
     type WorkbenchInfo = {
@@ -13,13 +13,37 @@ namespace RecipeTE {
         output?: string;
     }
 
-    type Recipe = {
-        result: RecipeItem;
-        mask: string[]|string;
-        ingredients: IngredientsList;
+    interface CraftFunction {
+        (container: ItemContainer, workbench: Workbench, tileEntity: WorkbenchPrototype): void;
     }
 
-    const AIR_ITEM:RecipeItem = { id:0 };
+    function defaultCraftFunction(container: ItemContainer, workbench: Workbench) {
+        for (var i = 0; i < workbench.countSlot; i++) {
+            var input_slot_name: string;
+            if (Array.isArray(workbench.input))
+                input_slot_name = workbench.input[i]
+            else
+                input_slot_name = workbench.input + i;
+
+            var slot: ItemInstance = container.getSlot(input_slot_name);
+            if (slot.count > 0) {
+                slot.count--;
+
+                if (slot.count == 0)
+                    slot.data = slot.id = slot.count;
+            }
+            container.setSlot(input_slot_name, slot.id, slot.count, slot.data, slot.extra);
+        }
+    }
+
+    export type Recipe = {
+        result: RecipeItem;
+        mask: string[] | string;
+        ingredients: IngredientsList;
+        craft: CraftFunction
+    }
+
+    export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
 
     export class Workbench implements WorkbenchInfo {
         private sID: string;
@@ -38,6 +62,9 @@ namespace RecipeTE {
             return this._window;
         }
         get columns(): number {
+            return this._columns;
+        }
+        get cols(): number {
             return this._columns;
         }
         get rows(): number {
@@ -64,7 +91,7 @@ namespace RecipeTE {
 
                 this._rows = info.rows || 1;
             }
-            
+
             this._countSlot = this._columns * this._rows;
 
             if (info.input) {
@@ -80,64 +107,86 @@ namespace RecipeTE {
             //window.getContent().elements
         }
 
-        public addRecipe(result: RecipeItem, mask: string[]|string, ingredients: IngredientsList): Workbench {
+        public addRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craftFunction?: CraftFunction): Workbench {
             let length = mask.length;
-            if(ingredients["#"])
+            if (ingredients["#"])
                 throw new SyntaxError("Ingredient cannot be registered to char #");
 
+            if (ingredients[" "])
+                throw new SyntaxError("Ingredient cannot be registered to chas \"space\"");
+
             ingredients["#"] = AIR_ITEM;
-            
-            if(Array.isArray(mask)){
-                if(length > this.rows)
+
+            if (Array.isArray(mask)) {
+                if (length > this.rows)
                     throw new RangeError(`Length of the mask must be <= ${this.rows}`);
-                else if(length < 1)
+                else if (length < 1)
                     throw new RangeError(`Length of the mask must be >= 1`);
-                
+
                 let l = mask[0].length;
 
-                if(l > this.columns)
+                if (l > this.columns)
                     throw new RangeError(`Length of the mask line must be <= ${this.columns}`);
-                else if(l < 1)
+                else if (l < 1)
                     throw new RangeError(`Length of the mask line must be >= 1`);
-                
-                
-                for(let i = length-1; i >= 1; i--){
+
+
+                for (let i = length - 1; i >= 1; i--) {
                     let ll = mask[i].length;
-                    if(ll == 0)
+                    if (ll == 0)
                         mask[i] = "".padStart(l, "#");
-                    else if(ll != l)
+                    else if (ll != l)
                         throw new RangeError(`Mask lines must be the same size.`);
                     else
                         mask[i] = mask[i].replace(/\s/g, "#");
 
-                    for(let ii = l-1; ii >= 0; ii--)
-                        if(ingredients[mask[i][ii]] == undefined)
+                    for (let ii = l - 1; ii >= 0; ii--)
+                        if (ingredients[mask[i][ii]] == undefined)
                             throw new SyntaxError("Unknown ingredient " + mask[i][ii]);
                 }
 
-            }else if(length > this.countSlot)
+            } else if (length > this.countSlot)
                 throw new RangeError(`Length of the mask must be <= ${this.countSlot}`);
-            else if(length < 1)
+            else if (length < 1)
                 throw new RangeError(`Length of the mask must be >= 1`);
-            else{
+            else {
                 mask = mask.replace(/\s/g, "#");
 
-                for(let i = length-1; i >= 0; i--)
-                    if(ingredients[mask[i]] == undefined)
+                for (let i = length - 1; i >= 0; i--)
+                    if (ingredients[mask[i]] == undefined)
                         throw new SyntaxError("Unknown ingredient " + mask[i]);
             }
 
-            var recipe:Recipe = {
-                result:result,
-                mask:mask,
-                ingredients:ingredients
+            var recipe: Recipe = {
+                result: result,
+                mask: mask,
+                ingredients: ingredients,
+                craft: defaultCraftFunction
             };
+
+            if (craftFunction)
+                recipe.craft = craftFunction;
 
             this.recipes.push(recipe)
             return this;
         }
+        public getRecipes(): Recipe[] {
+            return this.recipes;
+        }
 
-        
+        public hasInputSlot(nameSlot: string): boolean {
+            if (Array.isArray(this._input))
+                return this._input.indexOf(nameSlot) != -1
+
+            if (!nameSlot.startsWith(this._input))
+                return false;
+
+            let i = parseInt(nameSlot.replace(this._input, ""));
+            if (isNaN(i))
+                return false;
+
+            return i >= 0 && i < this.countSlot;
+        }
 
         public toString(): string {
             return this.sID;

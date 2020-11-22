@@ -10,7 +10,7 @@ namespace RecipeTE {
     export type Recipe = {
         result: RecipeItem;
         mask: string[] | string;
-        ingredients: IngredientsList;
+        ingredients: IngredientsList | RecipeItem[];
         craft: CraftFunction
     }
 
@@ -87,7 +87,44 @@ namespace RecipeTE {
             //window.getContent().elements
         }
 
-        public addRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craftFunction?: CraftFunction): Workbench {
+        public addRecipe(result: RecipeItem, ingredients: RecipeItem[], craftFunction?: CraftFunction): Workbench {
+            if (result.count === undefined) result.count = 1;
+            if (result.data === undefined) result.data = 0;
+
+            if (ingredients[0].count === undefined)
+                ingredients[0].count = 1;
+            if (ingredients[0].data === undefined)
+                ingredients[0].data = -1;
+            let count: number = ingredients[0].count;
+
+            for (let i = ingredients.length - 1; i >= 1; i--) {
+                if (ingredients[i].count === undefined)
+                    ingredients[i].count = 1;
+                if (ingredients[i].data === undefined)
+                    ingredients[i].data = -1;
+
+                count += ingredients[i].count;
+            }
+
+            if (count > this.countSlot)
+                throw new RangeError(`Ingredients must be <= ${this.countSlot}`);
+
+            var recipe: Recipe = {
+                result: result,
+                mask: null,
+                ingredients: ingredients,
+                craft: craftFunction || defaultCraftFunction
+            };
+
+            this.recipes.push(recipe)
+
+            return this;
+        }
+
+        public addShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craftFunction?: CraftFunction): Workbench {
+            if (result.count === undefined) result.count = 1;
+            if (result.data === undefined) result.data = 0;
+
             let length = mask.length;
             if (ingredients["#"])
                 throw new SyntaxError("Ingredient cannot be registered to char #");
@@ -141,16 +178,13 @@ namespace RecipeTE {
                 result: result,
                 mask: mask,
                 ingredients: ingredients,
-                craft: defaultCraftFunction
+                craft: craftFunction || defaultCraftFunction
             };
-
-            if (craftFunction)
-                recipe.craft = craftFunction;
 
             this.recipes.push(recipe)
             return this;
         }
-        
+
         public getRecipes(): Recipe[] {
             return this.recipes;
         }
@@ -219,8 +253,12 @@ namespace RecipeTE {
         Workbench.registerWorkbench(workbench);
         return workbench;
     }
-    export function addRecipe(sID:string, result:RecipeItem, mask:string[]|string, ingredients:IngredientsList, craft?:CraftFunction){
-        Workbench.getWorkbench(sID).addRecipe(result, mask, ingredients, craft)
+
+    export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction) {
+        Workbench.getWorkbench(sID).addRecipe(result, ingredients, craft)
+    }
+    export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction) {
+        Workbench.getWorkbench(sID).addShapeRecipe(result, mask, ingredients, craft)
     }
 }
 //throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);

@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 /*
      ____             _            _____ _ _       _____       _   _ _
     |  _ \  ___   ___(_)_ __   ___|_   _(_) | ___ | ____|_ __ | |_(_) |_ _   _
@@ -45,19 +58,6 @@ LIBRARY({
     api: "CoreEngine",
     shared: true
 });
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var RecipeTE;
 (function (RecipeTE) {
     var RegisterError = /** @class */ (function (_super) {
@@ -202,7 +202,7 @@ var RecipeTE;
                     throw new RangeError("Length of the mask line must be <= " + this.columns);
                 else if (l < 1)
                     throw new RangeError("Length of the mask line must be >= 1");
-                for (var i = length - 1; i >= 1; i--) {
+                for (var i = length - 1; i >= 0; i--) {
                     var ll = mask[i].length;
                     if (ll == 0)
                         mask[i] = "".padStart(l, "#");

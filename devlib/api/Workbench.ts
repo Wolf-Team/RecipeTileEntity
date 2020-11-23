@@ -155,7 +155,7 @@ namespace RecipeTE {
                     throw new RangeError(`Length of the mask line must be >= 1`);
 
 
-                for (let i = length - 1; i >= 1; i--) {
+                for (let i = length - 1; i >= 0; i--) {
                     let ll = mask[i].length;
                     if (ll == 0)
                         mask[i] = "".padStart(l, "#");

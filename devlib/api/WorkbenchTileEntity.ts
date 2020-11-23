@@ -12,10 +12,11 @@ namespace RecipeTE {
         public currentRecipe: Recipe;
         public container: ItemContainer;
         public useNetworkItemContainer: true = true;
-        private enabled: boolean = false;
+        private enabled: boolean = true;
 
-        constructor(workbench: Workbench | string) {
+        constructor(workbench: Workbench | string, state: boolean = true) {
             this.setWorkbench(workbench);
+            this.setEnabled(state);
         }
 
         public setWorkbench(workbench: Workbench | string): void {

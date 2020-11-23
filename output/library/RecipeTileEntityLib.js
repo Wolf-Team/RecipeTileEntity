@@ -305,10 +305,12 @@ var RecipeTE;
 var RecipeTE;
 (function (RecipeTE) {
     var WorkbenchTileEntity = /** @class */ (function () {
-        function WorkbenchTileEntity(workbench) {
+        function WorkbenchTileEntity(workbench, state) {
+            if (state === void 0) { state = true; }
             this.useNetworkItemContainer = true;
-            this.enabled = false;
+            this.enabled = true;
             this.setWorkbench(workbench);
+            this.setEnabled(state);
         }
         WorkbenchTileEntity.prototype.setWorkbench = function (workbench) {
             if (!RecipeTE.Workbench.isRegister(workbench))

@@ -73,7 +73,7 @@ declare namespace RecipeTE {
         container: ItemContainer;
         useNetworkItemContainer: true;
         private enabled;
-        constructor(workbench: Workbench | string);
+        constructor(workbench: Workbench | string, state?: boolean);
         setWorkbench(workbench: Workbench | string): void;
         setTransferPolicy(): void;
         getInputSlots(): ItemInstance[];

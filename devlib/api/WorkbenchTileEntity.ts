@@ -188,22 +188,20 @@ namespace RecipeTE {
                     
                     for(let i = this.workbench.countSlot-1;i>=0;i--){
                         let input = inputs[i];
-
-                        if(recipe.ingredients[`${input.id}:${input.data}`]){
-                            if(!currentRecipe[`${input.id}:${input.data}`])
-                                currentRecipe[`${input.id}:${input.data}`] = 0;
+                        let key = `${input.id}:${input.data}`;
+                        if(!recipe.ingredients[`${input.id}:${input.data}`])
+                            key = `${input.id}:-1`;
+                        
+                        if(recipe.ingredients[key]){
+                            if(!currentRecipe[key])
+                                currentRecipe[key] = 0;
                             
-                            currentRecipe[`${input.id}:${input.data}`]++;
-                        }else if(recipe.ingredients[`${input.id}:-1`]){
-                            if(!currentRecipe[`${input.id}:-1`])
-                                currentRecipe[`${input.id}:-1`] = 0;
-                            
-                            currentRecipe[`${input.id}:-1`]++;
+                            currentRecipe[key]++;
                         }else if(input.id != 0)
                             return false;
                     }
 
-                    for(let i in currentRecipe)
+                    for(let i in recipe.ingredients)
                         if(recipe.ingredients[i].count != currentRecipe[i])
                             return false;
                     

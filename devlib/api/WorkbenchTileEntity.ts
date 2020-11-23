@@ -12,6 +12,7 @@ namespace RecipeTE {
         public currentRecipe: Recipe;
         public container: ItemContainer;
         public useNetworkItemContainer: true = true;
+        private enabled: boolean = false;
 
         constructor(workbench: Workbench | string) {
             this.setWorkbench(workbench);
@@ -27,7 +28,7 @@ namespace RecipeTE {
                 this.workbench = Workbench.getWorkbench(workbench);
         }
 
-        public setTransferPolicy() {
+        public setTransferPolicy(): void {
             this.container.setGlobalAddTransferPolicy(
                 function (container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number) {
                     let self: WorkbenchTileEntity = container.getParent();
@@ -86,7 +87,10 @@ namespace RecipeTE {
             return this.container.getSlot(this.workbench.output);
         }
 
-        public validRecipe(slotName?: string, item?: ItemInstance) {
+        public validRecipe(slotName?: string, item?: ItemInstance): void {
+            if (!this.enabled)
+                return this.container.clearSlot(this.workbench.output);
+
             let recipes: Recipe[] = this.workbench.getRecipes();
             let inputs: ItemInstance[] = this.getInputSlots();
             let output: ItemInstance = this.getOutputSlot();
@@ -129,7 +133,6 @@ namespace RecipeTE {
                                 if (ingredient.data == undefined)
                                     ingredient.data = -1;
 
-                                alert(`${i * this.workbench.cols + j}) ${input.id} == ${ingredient.id}`)
                                 if (ingredient.id == input.id && (ingredient.data == -1 || ingredient.data == input.data)) {
                                     iOffset = i;
                                     jOffset = j;
@@ -145,7 +148,6 @@ namespace RecipeTE {
                                     if (col)
                                         ingredient = recipe.ingredients[col];
                                 }
-                                alert(`${i * this.workbench.cols + j}) ${input.id} == ${ingredient.id}`)
                                 if (input.id != ingredient.id) {
                                     if (recipe.ingredients[recipe.mask[0][0]].id == 0) {
                                         select = false;
@@ -158,7 +160,7 @@ namespace RecipeTE {
                             }
                         }
                     }
-                } else if(recipe.mask){
+                } else if (recipe.mask) {
                     let iLength: number = this.workbench.countSlot - recipe.mask.length,
                         iOffset: number = 0;
                     for (let i = 0; i < this.workbench.countSlot; i++) {
@@ -183,28 +185,28 @@ namespace RecipeTE {
                                 return false;
                         }
                     }
-                }else{
+                } else {
                     let currentRecipe = {};
-                    
-                    for(let i = this.workbench.countSlot-1;i>=0;i--){
+
+                    for (let i = this.workbench.countSlot - 1; i >= 0; i--) {
                         let input = inputs[i];
                         let key = `${input.id}:${input.data}`;
-                        if(!recipe.ingredients[`${input.id}:${input.data}`])
+                        if (!recipe.ingredients[`${input.id}:${input.data}`])
                             key = `${input.id}:-1`;
-                        
-                        if(recipe.ingredients[key]){
-                            if(!currentRecipe[key])
+
+                        if (recipe.ingredients[key]) {
+                            if (!currentRecipe[key])
                                 currentRecipe[key] = 0;
-                            
+
                             currentRecipe[key]++;
-                        }else if(input.id != 0)
+                        } else if (input.id != 0)
                             return false;
                     }
 
-                    for(let i in recipe.ingredients)
-                        if(recipe.ingredients[i].count != currentRecipe[i])
+                    for (let i in recipe.ingredients)
+                        if (recipe.ingredients[i].count != currentRecipe[i])
                             return false;
-                    
+
                     return true;
                 }
 
@@ -249,9 +251,22 @@ namespace RecipeTE {
         public registerTileEntity(BlockID: number): void {
             TileEntity.registerPrototype(BlockID, this);
         }
+
+
+        public setEnabled(state: boolean): void {
+            this.enabled = state;
+            this.validRecipe();
+        }
+
+        public enable(): void {
+            this.setEnabled(true);
+        }
+        public disable(): void {
+            this.setEnabled(false);
+        }
     }
 
-    export function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype) {
+    export function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype): void {
         if (prototype instanceof WorkbenchTileEntity)
             prototype.registerTileEntity(BlockID);
 

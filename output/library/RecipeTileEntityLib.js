@@ -307,6 +307,7 @@ var RecipeTE;
     var WorkbenchTileEntity = /** @class */ (function () {
         function WorkbenchTileEntity(workbench) {
             this.useNetworkItemContainer = true;
+            this.enabled = false;
             this.setWorkbench(workbench);
         }
         WorkbenchTileEntity.prototype.setWorkbench = function (workbench) {
@@ -367,6 +368,8 @@ var RecipeTE;
         };
         WorkbenchTileEntity.prototype.validRecipe = function (slotName, item) {
             var _this = this;
+            if (!this.enabled)
+                return this.container.clearSlot(this.workbench.output);
             var recipes = this.workbench.getRecipes();
             var inputs = this.getInputSlots();
             var output = this.getOutputSlot();
@@ -398,7 +401,6 @@ var RecipeTE;
                                 var ingredient = recipe.ingredients[recipe.mask[0][0]];
                                 if (ingredient.data == undefined)
                                     ingredient.data = -1;
-                                alert(i * _this.workbench.cols + j + ") " + input.id + " == " + ingredient.id);
                                 if (ingredient.id == input.id && (ingredient.data == -1 || ingredient.data == input.data)) {
                                     iOffset = i;
                                     jOffset = j;
@@ -416,7 +418,6 @@ var RecipeTE;
                                     if (col)
                                         ingredient = recipe.ingredients[col];
                                 }
-                                alert(i * _this.workbench.cols + j + ") " + input.id + " == " + ingredient.id);
                                 if (input.id != ingredient.id) {
                                     if (recipe.ingredients[recipe.mask[0][0]].id == 0) {
                                         select = false;
@@ -509,6 +510,16 @@ var RecipeTE;
         };
         WorkbenchTileEntity.prototype.registerTileEntity = function (BlockID) {
             TileEntity.registerPrototype(BlockID, this);
+        };
+        WorkbenchTileEntity.prototype.setEnabled = function (state) {
+            this.enabled = state;
+            this.validRecipe();
+        };
+        WorkbenchTileEntity.prototype.enable = function () {
+            this.setEnabled(true);
+        };
+        WorkbenchTileEntity.prototype.disable = function () {
+            this.setEnabled(false);
         };
         return WorkbenchTileEntity;
     }());

@@ -13,7 +13,7 @@ namespace RecipeTE {
         ingredients: IngredientsList;
         craft: CraftFunction
     }
-    
+
 
     export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
 
@@ -93,13 +93,13 @@ namespace RecipeTE {
             if (result.data === undefined) result.data = 0;
 
             let count: number = 0;
-            let outputIngredients:IngredientsList = {};
-            ingredients.forEach((item)=>{
+            let outputIngredients: IngredientsList = {};
+            ingredients.forEach((item) => {
                 if (item.count === undefined)
                     item.count = 1;
                 if (item.data === undefined)
                     item.data = -1;
-                
+
                 count += item.count;
                 outputIngredients[`${item.id}:${item.data}`] = item;
             })
@@ -122,7 +122,7 @@ namespace RecipeTE {
                 ingredients: outputIngredients,
                 craft: craftFunction || defaultCraftFunction
             };
-            
+
             this.recipes.push(recipe)
 
             return this;
@@ -235,7 +235,7 @@ namespace RecipeTE {
         }
     }
 
-    function defaultCraftFunction(container: ItemContainer, workbench: Workbench) {
+    function defaultCraftFunction(container: ItemContainer, workbench: Workbench): void {
         for (var i = 0; i < workbench.countSlot; i++) {
             var input_slot_name: string;
             if (Array.isArray(workbench.input))
@@ -261,10 +261,10 @@ namespace RecipeTE {
         return workbench;
     }
 
-    export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction) {
+    export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction): void {
         Workbench.getWorkbench(sID).addRecipe(result, ingredients, craft)
     }
-    export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction) {
+    export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction): void {
         Workbench.getWorkbench(sID).addShapeRecipe(result, mask, ingredients, craft)
     }
 }

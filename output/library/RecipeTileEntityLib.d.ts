@@ -59,7 +59,6 @@ declare namespace RecipeTE {
     export function registerWorkbench(sID: string, info: WorkbenchInfo): Workbench;
     export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction): void;
     export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction): void;
-    export {};
 }
 declare namespace RecipeTE {
     interface WorkbenchPrototype extends TileEntity.TileEntityPrototype {
@@ -73,6 +72,7 @@ declare namespace RecipeTE {
         currentRecipe: Recipe;
         container: ItemContainer;
         useNetworkItemContainer: true;
+        private enabled;
         constructor(workbench: Workbench | string);
         setWorkbench(workbench: Workbench | string): void;
         setTransferPolicy(): void;
@@ -83,6 +83,9 @@ declare namespace RecipeTE {
         getScreenName(): string;
         getScreenByName(): UI.IWindow;
         registerTileEntity(BlockID: number): void;
+        setEnabled(state: boolean): void;
+        enable(): void;
+        disable(): void;
     }
     function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype): void;
 }

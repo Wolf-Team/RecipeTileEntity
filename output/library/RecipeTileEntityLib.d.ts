@@ -59,6 +59,7 @@ declare namespace RecipeTE {
     export function registerWorkbench(sID: string, info: WorkbenchInfo): Workbench;
     export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction): void;
     export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction): void;
+    export {};
 }
 declare namespace RecipeTE {
     interface WorkbenchPrototype extends TileEntity.TileEntityPrototype {
@@ -86,6 +87,7 @@ declare namespace RecipeTE {
         setEnabled(state: boolean): void;
         enable(): void;
         disable(): void;
+        isEnabled(): boolean;
     }
     function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype): void;
 }

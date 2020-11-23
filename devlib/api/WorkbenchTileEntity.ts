@@ -16,7 +16,7 @@ namespace RecipeTE {
 
         constructor(workbench: Workbench | string, state: boolean = true) {
             this.setWorkbench(workbench);
-            this.setEnabled(state);
+            this.enabled = state;
         }
 
         public setWorkbench(workbench: Workbench | string): void {
@@ -264,6 +264,10 @@ namespace RecipeTE {
         }
         public disable(): void {
             this.setEnabled(false);
+        }
+
+        public isEnabled():boolean{
+            return this.enabled;
         }
     }
 

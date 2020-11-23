@@ -310,7 +310,7 @@ var RecipeTE;
             this.useNetworkItemContainer = true;
             this.enabled = true;
             this.setWorkbench(workbench);
-            this.setEnabled(state);
+            this.enabled = state;
         }
         WorkbenchTileEntity.prototype.setWorkbench = function (workbench) {
             if (!RecipeTE.Workbench.isRegister(workbench))
@@ -522,6 +522,9 @@ var RecipeTE;
         };
         WorkbenchTileEntity.prototype.disable = function () {
             this.setEnabled(false);
+        };
+        WorkbenchTileEntity.prototype.isEnabled = function () {
+            return this.enabled;
         };
         return WorkbenchTileEntity;
     }());

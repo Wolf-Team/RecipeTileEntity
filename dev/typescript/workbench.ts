@@ -61,7 +61,7 @@ RecipeTE.registerWorkbench("customWorkbench", {
     "aa",
     "aa"
 ], { a: { id: 5 } })
-.addShapeRecipe({id:1}, "aaaa", {a:{id:5}})
-.addRecipe({id:2}, [{id:5,count:3}]);
+    .addShapeRecipe({ id: 1 }, "aaaa", { a: { id: 5 } })
+    .addRecipe({ id: 2 }, [{ id: 5, count: 3 }]);
 
 RecipeTE.registerTileEntity(BlockID["Workbench_Grid"], new RecipeTE.WorkbenchTileEntity("customWorkbench"))

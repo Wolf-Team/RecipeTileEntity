@@ -18,12 +18,13 @@ namespace RecipeTE {
     export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
 
     type WorkbenchList = { [sID: string]: Workbench };
-    type WorkbenchInfo = {
+    export type WorkbenchInfo = {
         window: UI.IWindow;
         columns: number;
         rows?: number;
         input?: string[] | string;
         output?: string;
+        time?: number;
     }
 
     export class Workbench implements WorkbenchInfo {
@@ -34,6 +35,7 @@ namespace RecipeTE {
         private _countSlot: number;
         private _input: string[] | string = "inputSlot";
         private _output: string = "outputSlot";
+        private _time: number = 0;
         private recipes: Recipe[] = [];
 
         get countSlot(): number {
@@ -50,6 +52,9 @@ namespace RecipeTE {
         }
         get rows(): number {
             return this._rows;
+        }
+        get time(): number {
+            return this._time;
         }
         get input(): string[] | string {
             return this._input;
@@ -85,7 +90,9 @@ namespace RecipeTE {
             if (info.output != undefined)
                 this._output = info.output;
 
-            //window.getContent().elements
+            if (info.time < 0)
+                throw new RangeError(`"info.time" must be >= 0.`);
+
         }
 
         public addRecipe(result: RecipeItem, ingredients: RecipeItem[], craftFunction?: CraftFunction): Workbench {
@@ -194,6 +201,110 @@ namespace RecipeTE {
 
         public getRecipes(): Recipe[] {
             return this.recipes;
+        }
+
+        public getRecipe(inputs: ItemInstance[]): Recipe {
+            return this.recipes.find((recipe: Recipe) => {
+                let select: boolean = false;
+                if (Array.isArray(recipe.mask)) {
+                    let iLength: number = this.rows - recipe.mask.length,
+                        jLength: number = this.cols - recipe.mask[0].length,
+                        iOffset: number = 0,
+                        jOffset: number = 0;
+
+                    for (let i = 0; i < this.rows; i++) {
+                        for (let j = 0; j < this.cols; j++) {
+                            if (i > iLength && !select) return false;
+
+                            let input = inputs[i * this.cols + j];
+                            if (j > jLength && !select)
+                                if (input.id != RecipeTE.AIR_ITEM.id)
+                                    return false;
+
+                            if (!select) {
+                                let ingredient = recipe.ingredients[recipe.mask[0][0]];
+                                if (ingredient.data == undefined)
+                                    ingredient.data = -1;
+
+                                if (ingredient.id == input.id && (ingredient.data == -1 || ingredient.data == input.data)) {
+                                    iOffset = i;
+                                    jOffset = j;
+                                    select = true;
+                                } else if (input.id != 0) {
+                                    return false;
+                                }
+                            } else {
+                                let ingredient = RecipeTE.AIR_ITEM;
+                                let row = recipe.mask[i - iOffset];
+                                if (row) {
+                                    let col = row[j - jOffset];
+                                    if (col)
+                                        ingredient = recipe.ingredients[col];
+                                }
+                                if (input.id != ingredient.id) {
+                                    if (recipe.ingredients[recipe.mask[0][0]].id == 0) {
+                                        select = false;
+                                        i = iOffset;
+                                        j = jOffset;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (recipe.mask) {
+                    let iLength: number = this.countSlot - recipe.mask.length,
+                        iOffset: number = 0;
+                    for (let i = 0; i < this.countSlot; i++) {
+                        if (i > iLength && !select) return false;
+
+                        let input = inputs[i];
+                        if (!select) {
+                            let ingredient = recipe.ingredients[recipe.mask[0]];
+                            if (input.id == ingredient.id) {
+                                iOffset = i;
+                                select = true;
+                            } else if (input.id != 0) {
+                                return false;
+                            }
+                        } else {
+                            let ingredient = AIR_ITEM;
+                            let col = recipe.mask[i - iOffset];
+                            if (col)
+                                ingredient = recipe.ingredients[col];
+
+                            if (input.id != ingredient.id)
+                                return false;
+                        }
+                    }
+                } else {
+                    let currentRecipe = {};
+
+                    for (let i = this.countSlot - 1; i >= 0; i--) {
+                        let input = inputs[i];
+                        let key = `${input.id}:${input.data}`;
+                        if (!recipe.ingredients[`${input.id}:${input.data}`])
+                            key = `${input.id}:-1`;
+
+                        if (recipe.ingredients[key]) {
+                            if (!currentRecipe[key])
+                                currentRecipe[key] = 0;
+
+                            currentRecipe[key]++;
+                        } else if (input.id != 0)
+                            return false;
+                    }
+
+                    for (let i in recipe.ingredients)
+                        if (recipe.ingredients[i].count != currentRecipe[i])
+                            return false;
+
+                    return true;
+                }
+
+                return select;
+            }, this)
         }
 
         public hasInputSlot(nameSlot: string): boolean {

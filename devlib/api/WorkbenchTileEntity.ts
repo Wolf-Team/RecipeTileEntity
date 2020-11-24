@@ -29,9 +29,9 @@ namespace RecipeTE {
                 this.workbench = Workbench.getWorkbench(workbench);
         }
 
-        public takeResult(amount: number): number {
+        public takeResult(container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number): number {
             for (let i = 0; i < amount; i++)
-                this.currentRecipe.craft(this.container, this.workbench, this);
+                this.currentRecipe.craft(container, this.workbench, this);
 
             return amount;
         }
@@ -58,7 +58,7 @@ namespace RecipeTE {
                 function (container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number) {
                     let self: WorkbenchTileEntity = container.getParent();
                     if (self.workbench.output == name) {
-                        return self.takeResult(amount);
+                        return self.takeResult(container, name, id, amount, data, extra, playerUid);
                     }
                     if (self.workbench.hasInputSlot(name)) {
                         let item: ItemInstance = {

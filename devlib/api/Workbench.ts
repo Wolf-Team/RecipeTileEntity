@@ -24,6 +24,7 @@ namespace RecipeTE {
         rows?: number;
         input?: string[] | string;
         output?: string;
+        scale?: string;
         time?: number;
     }
 
@@ -35,6 +36,7 @@ namespace RecipeTE {
         private _countSlot: number;
         private _input: string[] | string = "inputSlot";
         private _output: string = "outputSlot";
+        private _scale: string = "progressScale";
         private _time: number = 0;
         private recipes: Recipe[] = [];
 
@@ -61,6 +63,9 @@ namespace RecipeTE {
         }
         get output(): string {
             return this._output;
+        }
+        get scale(): string {
+            return this._scale;
         }
 
         constructor(sID: string, info: WorkbenchInfo) {
@@ -90,8 +95,15 @@ namespace RecipeTE {
             if (info.output != undefined)
                 this._output = info.output;
 
-            if (info.time < 0)
-                throw new RangeError(`"info.time" must be >= 0.`);
+
+            if (info.scale != undefined)
+                this._scale = info.scale;
+
+            if (info.time != undefined) {
+                if (info.time < 0)
+                    throw new RangeError(`"info.time" must be >= 0.`);
+                this._time = info.time;
+            }
 
         }
 

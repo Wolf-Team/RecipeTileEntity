@@ -45,49 +45,27 @@ var Furnace = new UI.StandartWindow({
     }
 });
 
-class MyFurnace extends RecipeTE.TimerWorkbenchTileEntity{
-    constructor(sID:string|RecipeTE.Workbench){
+class CustomFurnace extends RecipeTE.TimerWorkbenchTileEntity {
+    constructor(sID: string | RecipeTE.Workbench) {
         super(sID, false);
     }
-    public redstone(params: { power: number, signal: number, onLoad: boolean }){
-        if (params.power < 10)
-            this.disable();
-        else
-            this.enable();
-    }
+    // public redstone(params: { power: number, signal: number, onLoad: boolean }){
+    //     if (params.power < 10)
+    //         this.disable();
+    //     else
+    //         this.enable();
+    // }
 }
 
 RecipeTE.registerWorkbench("customFurnace", {
     window: Furnace,
     columns: 1,
     input: ["myInputSlot"],
-    output: "myInputSlot",
+    output: "myOutputSlot",
+    scale: "timerScale",
     time: 5 * 20
 });
-RecipeTE.addRecipe("Furnace", {id:280}, [{id:5}]);
-RecipeTE.addRecipe("Furnace", {id:281}, [{id:1}] /*, .2 */);
+RecipeTE.addRecipe("customFurnace", { id: 280 }, [{ id: 5 }]);
+RecipeTE.addRecipe("customFurnace", { id: 281 }, [{ id: 1 }] /*, .2 */);
 
-RecipeTE.registerTileEntity(BlockID["Furnace"], new MyFurnace("customFurnace"))
-
-// RecipeTE.registerWorkbench({
-//     sid:"Furnace",
-//     time: 5 * 20, //Время крафта
-//     columns: 1, //Кол-во слотов
-//     window: Furnace, //Интерфейс печи
-//     input: ["myInputSlot"], //Входные слоты
-//     output: "myOutputSlot", //Слот результата
-//     scale: "timerScale", //Шкала прогресса
-// }, {
-//     condition: function () { //Условие работы верстака
-//         return this.data.power
-//     },
-//     defaultValues: {
-//         power: false,
-//     },
-//     redstone: function (params) {
-//         if (params.power < 10)
-//             this.data.power = false;
-//         else
-//             this.data.power = true;
-//     }
-// });
+RecipeTE.registerTileEntity(BlockID["Furnace"], new CustomFurnace("customFurnace"))

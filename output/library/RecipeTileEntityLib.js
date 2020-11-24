@@ -69,6 +69,196 @@ var RecipeTE;
     }(Error));
     RecipeTE.RegisterError = RegisterError;
 })(RecipeTE || (RecipeTE = {}));
+var RecipeTE;
+(function (RecipeTE) {
+    var WorkbenchTileEntity = /** @class */ (function () {
+        function WorkbenchTileEntity(workbench, state) {
+            if (state === void 0) { state = true; }
+            this.useNetworkItemContainer = true;
+            this.enabled = true;
+            this.setWorkbench(workbench);
+            this.enabled = state;
+        }
+        WorkbenchTileEntity.prototype.setWorkbench = function (workbench) {
+            if (!RecipeTE.Workbench.isRegister(workbench))
+                throw new RecipeTE.RegisterError("Workbench with sID \"" + workbench + "\" yet not been registered.");
+            if (workbench instanceof RecipeTE.Workbench)
+                this.workbench = workbench;
+            else
+                this.workbench = RecipeTE.Workbench.getWorkbench(workbench);
+        };
+        WorkbenchTileEntity.prototype.takeResult = function (container, name, id, amount, data, extra, playerUid) {
+            for (var i = 0; i < amount; i++)
+                this.currentRecipe.craft(container, this.workbench, this);
+            return amount;
+        };
+        WorkbenchTileEntity.prototype.setTransferPolicy = function () {
+            this.container.setGlobalAddTransferPolicy(function (container, name, id, amount, data, extra, playerUid) {
+                var self = container.getParent();
+                if (self.workbench.output == name)
+                    return 0;
+                if (self.workbench.hasInputSlot(name)) {
+                    self.validRecipe(name, {
+                        id: id,
+                        data: data,
+                        count: container.getSlot(name).count + amount,
+                        extra: extra
+                    });
+                }
+                return amount;
+            });
+            this.container.setGlobalGetTransferPolicy(function (container, name, id, amount, data, extra, playerUid) {
+                var self = container.getParent();
+                if (self.workbench.output == name) {
+                    return self.takeResult(container, name, id, amount, data, extra, playerUid);
+                }
+                if (self.workbench.hasInputSlot(name)) {
+                    var item = {
+                        id: id,
+                        data: data,
+                        count: container.getSlot(name).count - amount,
+                        extra: extra
+                    };
+                    if (item.count == 0)
+                        item = { id: 0, data: 0, count: 0 };
+                    self.validRecipe(name, item);
+                }
+                return amount;
+            });
+        };
+        WorkbenchTileEntity.prototype.getInputSlots = function (slotName, item) {
+            var slots = [];
+            for (var i = 0, l = this.workbench.countSlot; i < l; i++) {
+                var key = void 0;
+                if (Array.isArray(this.workbench.input))
+                    key = this.workbench.input[i];
+                else
+                    key = this.workbench.input + i;
+                slots.push(slotName == key ? item : this.container.getSlot(key));
+            }
+            return slots;
+        };
+        WorkbenchTileEntity.prototype.getOutputSlot = function () {
+            return this.container.getSlot(this.workbench.output);
+        };
+        WorkbenchTileEntity.prototype.validRecipe = function (slotName, item) {
+            if (!this.enabled) {
+                this.currentRecipe = null;
+                return this.container.clearSlot(this.workbench.output);
+            }
+            var inputs = this.getInputSlots(slotName, item);
+            var recipe = this.workbench.getRecipe(inputs);
+            var result = RecipeTE.AIR_ITEM;
+            if (recipe)
+                result = recipe.result;
+            if (result.count === undefined)
+                result.count = 1;
+            if (result.data === undefined)
+                result.data = 0;
+            var count = 1;
+            if (result.id != 0) {
+                count = 0;
+                for (var i = inputs.length - 1; i >= 1 && count != 1; i--)
+                    if ((count == 0 && inputs[i].count != 0) || (count > inputs[i].count))
+                        count = inputs[i].count;
+            }
+            this.currentRecipe = recipe;
+            this.container.setSlot(this.workbench.output, result.id, result.count * count, result.data);
+        };
+        //TileEntity
+        WorkbenchTileEntity.prototype.init = function () {
+            this.container.setParent(this);
+            this.setTransferPolicy();
+        };
+        WorkbenchTileEntity.prototype.getScreenName = function () {
+            return "main";
+        };
+        WorkbenchTileEntity.prototype.getScreenByName = function () {
+            return this.workbench.window;
+        };
+        WorkbenchTileEntity.prototype.registerTileEntity = function (BlockID) {
+            TileEntity.registerPrototype(BlockID, this);
+        };
+        WorkbenchTileEntity.prototype.setEnabled = function (state) {
+            this.enabled = state;
+            this.validRecipe();
+        };
+        WorkbenchTileEntity.prototype.enable = function () {
+            this.setEnabled(true);
+        };
+        WorkbenchTileEntity.prototype.disable = function () {
+            this.setEnabled(false);
+        };
+        WorkbenchTileEntity.prototype.isEnabled = function () {
+            return this.enabled;
+        };
+        return WorkbenchTileEntity;
+    }());
+    RecipeTE.WorkbenchTileEntity = WorkbenchTileEntity;
+    function registerTileEntity(BlockID, prototype) {
+        if (prototype instanceof WorkbenchTileEntity)
+            prototype.registerTileEntity(BlockID);
+    }
+    RecipeTE.registerTileEntity = registerTileEntity;
+})(RecipeTE || (RecipeTE = {}));
+/// <reference path="WorkbenchTileEntity.ts" />
+var RecipeTE;
+(function (RecipeTE) {
+    var TimerWorkbenchTileEntity = /** @class */ (function (_super) {
+        __extends(TimerWorkbenchTileEntity, _super);
+        function TimerWorkbenchTileEntity() {
+            var _this = _super !== null && _super.apply(this, arguments) || this;
+            _this.ticks = 0;
+            return _this;
+        }
+        TimerWorkbenchTileEntity.prototype.tick = function () {
+            if (!this.currentRecipe || !this.isEnabled)
+                return;
+            this.ticks++;
+            this.container.setScale(this.workbench.scale, this.ticks / this.workbench.time);
+            if (this.ticks >= this.workbench.time) {
+                var output = this.getOutputSlot();
+                this.currentRecipe.craft(this.container, this.workbench, this);
+                this.container.setSlot(this.workbench.output, this.currentRecipe.result.id, output.count + this.currentRecipe.result.count, this.currentRecipe.result.data);
+                this.validRecipe();
+                this.ticks = 0;
+            }
+            this.container.sendChanges();
+        };
+        TimerWorkbenchTileEntity.prototype.takeResult = function (container, name, id, amount, data, extra, playerUid) {
+            var item = {
+                id: id,
+                data: data,
+                count: container.getSlot(name).count - amount,
+                extra: extra
+            };
+            if (item.count == 0)
+                item = { id: 0, data: 0, count: 0 };
+            this.validRecipe(name, item);
+            return amount;
+        };
+        TimerWorkbenchTileEntity.prototype.validRecipe = function (slotName, item) {
+            var inputs = this.getInputSlots(slotName, item);
+            var recipe = this.workbench.getRecipe(inputs);
+            if (!recipe) {
+                this.container.setScale(this.workbench.scale, this.ticks = 0);
+                return this.currentRecipe = null;
+            }
+            var output = (slotName && slotName == this.workbench.output) ? item : this.getOutputSlot();
+            if (output.id == 0 || output.id == recipe.result.id)
+                this.currentRecipe = recipe;
+            else
+                this.currentRecipe = null;
+        };
+        TimerWorkbenchTileEntity.prototype.setEnabled = function (state) {
+            if (!state)
+                this.container.setScale(this.workbench.scale, this.ticks = 0);
+            _super.prototype.setEnabled.call(this, state);
+        };
+        return TimerWorkbenchTileEntity;
+    }(RecipeTE.WorkbenchTileEntity));
+    RecipeTE.TimerWorkbenchTileEntity = TimerWorkbenchTileEntity;
+})(RecipeTE || (RecipeTE = {}));
 /// <reference path="Errors.ts" />
 var RecipeTE;
 (function (RecipeTE) {
@@ -78,6 +268,8 @@ var RecipeTE;
             this._rows = 1;
             this._input = "inputSlot";
             this._output = "outputSlot";
+            this._scale = "progressScale";
+            this._time = 0;
             this.recipes = [];
             this.sID = sID;
             this._window = info.window;
@@ -97,7 +289,13 @@ var RecipeTE;
             }
             if (info.output != undefined)
                 this._output = info.output;
-            //window.getContent().elements
+            if (info.scale != undefined)
+                this._scale = info.scale;
+            if (info.time != undefined) {
+                if (info.time < 0)
+                    throw new RangeError("\"info.time\" must be >= 0.");
+                this._time = info.time;
+            }
         }
         Object.defineProperty(Workbench.prototype, "countSlot", {
             get: function () {
@@ -134,6 +332,13 @@ var RecipeTE;
             enumerable: false,
             configurable: true
         });
+        Object.defineProperty(Workbench.prototype, "time", {
+            get: function () {
+                return this._time;
+            },
+            enumerable: false,
+            configurable: true
+        });
         Object.defineProperty(Workbench.prototype, "input", {
             get: function () {
                 return this._input;
@@ -144,6 +349,13 @@ var RecipeTE;
         Object.defineProperty(Workbench.prototype, "output", {
             get: function () {
                 return this._output;
+            },
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(Workbench.prototype, "scale", {
+            get: function () {
+                return this._scale;
             },
             enumerable: false,
             configurable: true
@@ -237,6 +449,104 @@ var RecipeTE;
         Workbench.prototype.getRecipes = function () {
             return this.recipes;
         };
+        Workbench.prototype.getRecipe = function (inputs) {
+            var _this = this;
+            return this.recipes.find(function (recipe) {
+                var select = false;
+                if (Array.isArray(recipe.mask)) {
+                    var iLength = _this.rows - recipe.mask.length, jLength = _this.cols - recipe.mask[0].length, iOffset = 0, jOffset = 0;
+                    for (var i = 0; i < _this.rows; i++) {
+                        for (var j = 0; j < _this.cols; j++) {
+                            if (i > iLength && !select)
+                                return false;
+                            var input = inputs[i * _this.cols + j];
+                            if (j > jLength && !select)
+                                if (input.id != RecipeTE.AIR_ITEM.id)
+                                    return false;
+                            if (!select) {
+                                var ingredient = recipe.ingredients[recipe.mask[0][0]];
+                                if (ingredient.data == undefined)
+                                    ingredient.data = -1;
+                                if (ingredient.id == input.id && (ingredient.data == -1 || ingredient.data == input.data)) {
+                                    iOffset = i;
+                                    jOffset = j;
+                                    select = true;
+                                }
+                                else if (input.id != 0) {
+                                    return false;
+                                }
+                            }
+                            else {
+                                var ingredient = RecipeTE.AIR_ITEM;
+                                var row = recipe.mask[i - iOffset];
+                                if (row) {
+                                    var col = row[j - jOffset];
+                                    if (col)
+                                        ingredient = recipe.ingredients[col];
+                                }
+                                if (input.id != ingredient.id) {
+                                    if (recipe.ingredients[recipe.mask[0][0]].id == 0) {
+                                        select = false;
+                                        i = iOffset;
+                                        j = jOffset;
+                                    }
+                                    else {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (recipe.mask) {
+                    var iLength = _this.countSlot - recipe.mask.length, iOffset = 0;
+                    for (var i = 0; i < _this.countSlot; i++) {
+                        if (i > iLength && !select)
+                            return false;
+                        var input = inputs[i];
+                        if (!select) {
+                            var ingredient = recipe.ingredients[recipe.mask[0]];
+                            if (input.id == ingredient.id) {
+                                iOffset = i;
+                                select = true;
+                            }
+                            else if (input.id != 0) {
+                                return false;
+                            }
+                        }
+                        else {
+                            var ingredient = RecipeTE.AIR_ITEM;
+                            var col = recipe.mask[i - iOffset];
+                            if (col)
+                                ingredient = recipe.ingredients[col];
+                            if (input.id != ingredient.id)
+                                return false;
+                        }
+                    }
+                }
+                else {
+                    var currentRecipe = {};
+                    for (var i = _this.countSlot - 1; i >= 0; i--) {
+                        var input = inputs[i];
+                        var key = input.id + ":" + input.data;
+                        if (!recipe.ingredients[input.id + ":" + input.data])
+                            key = input.id + ":-1";
+                        if (recipe.ingredients[key]) {
+                            if (!currentRecipe[key])
+                                currentRecipe[key] = 0;
+                            currentRecipe[key]++;
+                        }
+                        else if (input.id != 0)
+                            return false;
+                    }
+                    for (var i in recipe.ingredients)
+                        if (recipe.ingredients[i].count != currentRecipe[i])
+                            return false;
+                    return true;
+                }
+                return select;
+            }, this);
+        };
         Workbench.prototype.hasInputSlot = function (nameSlot) {
             if (Array.isArray(this._input))
                 return this._input.indexOf(nameSlot) != -1;
@@ -302,237 +612,4 @@ var RecipeTE;
     RecipeTE.addShapeRecipe = addShapeRecipe;
 })(RecipeTE || (RecipeTE = {}));
 //throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);
-var RecipeTE;
-(function (RecipeTE) {
-    var WorkbenchTileEntity = /** @class */ (function () {
-        function WorkbenchTileEntity(workbench, state) {
-            if (state === void 0) { state = true; }
-            this.useNetworkItemContainer = true;
-            this.enabled = true;
-            this.setWorkbench(workbench);
-            this.enabled = state;
-        }
-        WorkbenchTileEntity.prototype.setWorkbench = function (workbench) {
-            if (!RecipeTE.Workbench.isRegister(workbench))
-                throw new RecipeTE.RegisterError("Workbench with sID \"" + workbench + "\" yet not been registered.");
-            if (workbench instanceof RecipeTE.Workbench)
-                this.workbench = workbench;
-            else
-                this.workbench = RecipeTE.Workbench.getWorkbench(workbench);
-        };
-        WorkbenchTileEntity.prototype.setTransferPolicy = function () {
-            this.container.setGlobalAddTransferPolicy(function (container, name, id, amount, data, extra, playerUid) {
-                var self = container.getParent();
-                if (self.workbench.output == name)
-                    return 0;
-                if (self.workbench.hasInputSlot(name)) {
-                    self.validRecipe(name, {
-                        id: id,
-                        data: data,
-                        count: container.getSlot(name).count + amount,
-                        extra: extra
-                    });
-                }
-                return amount;
-            });
-            this.container.setGlobalGetTransferPolicy(function (container, name, id, amount, data, extra, playerUid) {
-                var self = container.getParent();
-                if (self.workbench.output == name) {
-                    for (var i = 0; i < amount; i++)
-                        self.currentRecipe.craft(container, self.workbench, self);
-                    return amount;
-                }
-                if (self.workbench.hasInputSlot(name)) {
-                    var item = {
-                        id: id,
-                        data: data,
-                        count: container.getSlot(name).count - amount,
-                        extra: extra
-                    };
-                    if (item.count == 0)
-                        item = { id: 0, data: 0, count: 0 };
-                    self.validRecipe(name, item);
-                }
-                return amount;
-            });
-        };
-        WorkbenchTileEntity.prototype.getInputSlots = function () {
-            var slots = [];
-            for (var i = 0, l = this.workbench.countSlot; i < l; i++)
-                if (Array.isArray(this.workbench.input))
-                    slots.push(this.container.getSlot(this.workbench.input[i]));
-                else
-                    slots.push(this.container.getSlot(this.workbench.input + i));
-            return slots;
-        };
-        WorkbenchTileEntity.prototype.getOutputSlot = function () {
-            return this.container.getSlot(this.workbench.output);
-        };
-        WorkbenchTileEntity.prototype.validRecipe = function (slotName, item) {
-            var _this = this;
-            if (!this.enabled)
-                return this.container.clearSlot(this.workbench.output);
-            var recipes = this.workbench.getRecipes();
-            var inputs = this.getInputSlots();
-            var output = this.getOutputSlot();
-            if (slotName) {
-                if (!this.workbench.hasInputSlot(slotName))
-                    throw new RangeError("Not found input slot with name " + slotName + " in current workbench(" + this.workbench.toString() + ")");
-                if (item == undefined)
-                    throw new TypeError("item was been ItemInstance");
-                var i = void 0;
-                if (Array.isArray(this.workbench.input))
-                    i = this.workbench.input.indexOf(slotName);
-                else
-                    i = parseInt(slotName.replace(this.workbench.input, ""));
-                inputs[i] = item;
-            }
-            var recipe = recipes.find(function (recipe) {
-                var select = false;
-                if (Array.isArray(recipe.mask)) {
-                    var iLength = _this.workbench.rows - recipe.mask.length, jLength = _this.workbench.cols - recipe.mask[0].length, iOffset = 0, jOffset = 0;
-                    for (var i = 0; i < _this.workbench.rows; i++) {
-                        for (var j = 0; j < _this.workbench.cols; j++) {
-                            if (i > iLength && !select)
-                                return false;
-                            var input = inputs[i * _this.workbench.cols + j];
-                            if (j > jLength && !select)
-                                if (input.id != RecipeTE.AIR_ITEM.id)
-                                    return false;
-                            if (!select) {
-                                var ingredient = recipe.ingredients[recipe.mask[0][0]];
-                                if (ingredient.data == undefined)
-                                    ingredient.data = -1;
-                                if (ingredient.id == input.id && (ingredient.data == -1 || ingredient.data == input.data)) {
-                                    iOffset = i;
-                                    jOffset = j;
-                                    select = true;
-                                }
-                                else if (input.id != 0) {
-                                    return false;
-                                }
-                            }
-                            else {
-                                var ingredient = RecipeTE.AIR_ITEM;
-                                var row = recipe.mask[i - iOffset];
-                                if (row) {
-                                    var col = row[j - jOffset];
-                                    if (col)
-                                        ingredient = recipe.ingredients[col];
-                                }
-                                if (input.id != ingredient.id) {
-                                    if (recipe.ingredients[recipe.mask[0][0]].id == 0) {
-                                        select = false;
-                                        i = iOffset;
-                                        j = jOffset;
-                                    }
-                                    else {
-                                        return false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (recipe.mask) {
-                    var iLength = _this.workbench.countSlot - recipe.mask.length, iOffset = 0;
-                    for (var i = 0; i < _this.workbench.countSlot; i++) {
-                        if (i > iLength && !select)
-                            return false;
-                        var input = inputs[i];
-                        if (!select) {
-                            var ingredient = recipe.ingredients[recipe.mask[0]];
-                            if (input.id == ingredient.id) {
-                                iOffset = i;
-                                select = true;
-                            }
-                            else if (input.id != 0) {
-                                return false;
-                            }
-                        }
-                        else {
-                            var ingredient = RecipeTE.AIR_ITEM;
-                            var col = recipe.mask[i - iOffset];
-                            if (col)
-                                ingredient = recipe.ingredients[col];
-                            if (input.id != ingredient.id)
-                                return false;
-                        }
-                    }
-                }
-                else {
-                    var currentRecipe = {};
-                    for (var i = _this.workbench.countSlot - 1; i >= 0; i--) {
-                        var input = inputs[i];
-                        var key = input.id + ":" + input.data;
-                        if (!recipe.ingredients[input.id + ":" + input.data])
-                            key = input.id + ":-1";
-                        if (recipe.ingredients[key]) {
-                            if (!currentRecipe[key])
-                                currentRecipe[key] = 0;
-                            currentRecipe[key]++;
-                        }
-                        else if (input.id != 0)
-                            return false;
-                    }
-                    for (var i in recipe.ingredients)
-                        if (recipe.ingredients[i].count != currentRecipe[i])
-                            return false;
-                    return true;
-                }
-                return select;
-            }, this);
-            var result = RecipeTE.AIR_ITEM;
-            if (recipe)
-                result = recipe.result;
-            if (result.count === undefined)
-                result.count = 1;
-            if (result.data === undefined)
-                result.data = 0;
-            var count = 1;
-            if (result.id != 0) {
-                count = 0;
-                for (var i = inputs.length - 1; i >= 1 && count != 1; i--)
-                    if ((count == 0 && inputs[i].count != 0) || (count > inputs[i].count))
-                        count = inputs[i].count;
-            }
-            this.currentRecipe = recipe;
-            this.container.setSlot(this.workbench.output, result.id, result.count * count, result.data);
-        };
-        //TileEntity
-        WorkbenchTileEntity.prototype.init = function () {
-            this.container.setParent(this);
-            this.setTransferPolicy();
-        };
-        WorkbenchTileEntity.prototype.getScreenName = function () {
-            return "main";
-        };
-        WorkbenchTileEntity.prototype.getScreenByName = function () {
-            return this.workbench.window;
-        };
-        WorkbenchTileEntity.prototype.registerTileEntity = function (BlockID) {
-            TileEntity.registerPrototype(BlockID, this);
-        };
-        WorkbenchTileEntity.prototype.setEnabled = function (state) {
-            this.enabled = state;
-            this.validRecipe();
-        };
-        WorkbenchTileEntity.prototype.enable = function () {
-            this.setEnabled(true);
-        };
-        WorkbenchTileEntity.prototype.disable = function () {
-            this.setEnabled(false);
-        };
-        WorkbenchTileEntity.prototype.isEnabled = function () {
-            return this.enabled;
-        };
-        return WorkbenchTileEntity;
-    }());
-    RecipeTE.WorkbenchTileEntity = WorkbenchTileEntity;
-    function registerTileEntity(BlockID, prototype) {
-        if (prototype instanceof WorkbenchTileEntity)
-            prototype.registerTileEntity(BlockID);
-    }
-    RecipeTE.registerTileEntity = registerTileEntity;
-})(RecipeTE || (RecipeTE = {}));
 EXPORT("RecipeTE", RecipeTE);

@@ -5,7 +5,7 @@ namespace RecipeTE {
         private ticks: number = 0;
 
         public tick() {
-            if (!this.currentRecipe || !this.isEnabled)
+            if (!this.currentRecipe || !this.isEnabled())
                 return;
 
             this.ticks++;

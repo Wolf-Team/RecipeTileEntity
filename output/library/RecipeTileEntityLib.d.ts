@@ -3,18 +3,23 @@ declare namespace RecipeTE {
     }
 }
 declare namespace RecipeTE {
-    interface WorkbenchPrototype extends TileEntity.TileEntityPrototype {
+    type WorkbenchTileEntityData = {
+        enabled: boolean;
+        [key: string]: any;
+    };
+    export interface WorkbenchPrototype extends TileEntity.TileEntityPrototype {
         workbench: Workbench;
         useNetworkItemContainer: true;
         getScreenByName: (name: string) => UI.IWindow;
         getScreenName: (player: number, coords: Vector) => string;
     }
-    class WorkbenchTileEntity implements WorkbenchPrototype {
+    export class WorkbenchTileEntity implements WorkbenchPrototype {
         workbench: Workbench;
         currentRecipe: Recipe;
         container: ItemContainer;
         useNetworkItemContainer: true;
-        private enabled;
+        defaultValues: WorkbenchTileEntityData;
+        data: WorkbenchTileEntityData;
         constructor(workbench: Workbench | string, state?: boolean);
         setWorkbench(workbench: Workbench | string): void;
         takeResult(container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number): number;
@@ -31,7 +36,8 @@ declare namespace RecipeTE {
         disable(): void;
         isEnabled(): boolean;
     }
-    function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype): void;
+    export function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype): void;
+    export {};
 }
 declare namespace RecipeTE {
     class TimerWorkbenchTileEntity extends WorkbenchTileEntity {
@@ -106,4 +112,5 @@ declare namespace RecipeTE {
     export function registerWorkbench(sID: string, info: WorkbenchInfo): Workbench;
     export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction): void;
     export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction): void;
+    export {};
 }

@@ -1,4 +1,5 @@
 namespace RecipeTE {
+    type WorkbenchTileEntityData = { enabled: boolean, [key: string]: any };
     export interface WorkbenchPrototype extends TileEntity.TileEntityPrototype {
         workbench: Workbench;
         useNetworkItemContainer: true;
@@ -12,11 +13,15 @@ namespace RecipeTE {
         public currentRecipe: Recipe;
         public container: ItemContainer;
         public useNetworkItemContainer: true = true;
-        private enabled: boolean = true;
+
+        public defaultValues: WorkbenchTileEntityData;
+        public data: WorkbenchTileEntityData;
 
         constructor(workbench: Workbench | string, state: boolean = true) {
             this.setWorkbench(workbench);
-            this.enabled = state;
+            this.defaultValues = {
+                enabled: state
+            };
         }
 
         public setWorkbench(workbench: Workbench | string): void {
@@ -97,7 +102,7 @@ namespace RecipeTE {
         }
 
         public validRecipe(slotName?: string, item?: ItemInstance): void {
-            if (!this.enabled) {
+            if (!this.isEnabled()) {
                 this.currentRecipe = null;
                 return this.container.clearSlot(this.workbench.output);
             }
@@ -148,7 +153,7 @@ namespace RecipeTE {
 
 
         public setEnabled(state: boolean): void {
-            this.enabled = state;
+            this.data.enabled = state;
             this.validRecipe();
         }
 
@@ -160,7 +165,7 @@ namespace RecipeTE {
         }
 
         public isEnabled(): boolean {
-            return this.enabled;
+            return this.data.enabled;
         }
     }
 

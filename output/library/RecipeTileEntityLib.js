@@ -75,9 +75,10 @@ var RecipeTE;
         function WorkbenchTileEntity(workbench, state) {
             if (state === void 0) { state = true; }
             this.useNetworkItemContainer = true;
-            this.enabled = true;
             this.setWorkbench(workbench);
-            this.enabled = state;
+            this.defaultValues = {
+                enabled: state
+            };
         }
         WorkbenchTileEntity.prototype.setWorkbench = function (workbench) {
             if (!RecipeTE.Workbench.isRegister(workbench))
@@ -142,7 +143,7 @@ var RecipeTE;
             return this.container.getSlot(this.workbench.output);
         };
         WorkbenchTileEntity.prototype.validRecipe = function (slotName, item) {
-            if (!this.enabled) {
+            if (!this.isEnabled()) {
                 this.currentRecipe = null;
                 return this.container.clearSlot(this.workbench.output);
             }
@@ -180,7 +181,7 @@ var RecipeTE;
             TileEntity.registerPrototype(BlockID, this);
         };
         WorkbenchTileEntity.prototype.setEnabled = function (state) {
-            this.enabled = state;
+            this.data.enabled = state;
             this.validRecipe();
         };
         WorkbenchTileEntity.prototype.enable = function () {
@@ -190,7 +191,7 @@ var RecipeTE;
             this.setEnabled(false);
         };
         WorkbenchTileEntity.prototype.isEnabled = function () {
-            return this.enabled;
+            return this.data.enabled;
         };
         return WorkbenchTileEntity;
     }());
@@ -212,7 +213,7 @@ var RecipeTE;
             return _this;
         }
         TimerWorkbenchTileEntity.prototype.tick = function () {
-            if (!this.currentRecipe || !this.isEnabled)
+            if (!this.currentRecipe || !this.isEnabled())
                 return;
             this.ticks++;
             this.container.setScale(this.workbench.scale, this.ticks / this.workbench.time);

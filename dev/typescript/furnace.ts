@@ -40,7 +40,7 @@ var Furnace = new UI.StandartWindow({
         },
         "myOutputSlot": {
             type: "slot",
-            x: 698, y: 170, 
+            x: 698, y: 170,
             scale: 4
         },
         "timerScale": {
@@ -73,13 +73,13 @@ class CustomFurnace extends RecipeTE.TimerWorkbenchTileEntity {
         this.defaultValues.currentDuration = 0;
     }
 
-    public init(){
+    public init() {
         super.init();
-        
-        this.container.setSlotAddTransferPolicy("fuelSlot", function(container, name, id, amount, data){
-            var self:CustomFurnace = container.getParent();
+
+        this.container.setSlotAddTransferPolicy("fuelSlot", function (container, name, id, amount, data) {
+            var self: CustomFurnace = container.getParent();
             let dur = Recipes.getFuelBurnDuration(id, data);
-            if(dur > 0){
+            if (dur > 0) {
                 self.enable();
                 return amount;
             }
@@ -87,27 +87,32 @@ class CustomFurnace extends RecipeTE.TimerWorkbenchTileEntity {
         });
     }
 
-    public tick(){
-        super.tick();
-
-        if(this.isEnabled()){
-            if(this.data.currentDuration){
+    public tick() {
+        if (this.isEnabled()) {
+            if (this.data.currentDuration) {
                 this.data.currentDuration--;
-            }else{
+            } else {
                 let fuel = this.container.getSlot("fuelSlot");
-                if(fuel.count != 0){
+                if (fuel.count != 0) {
                     this.setBurnDuration(Recipes.getFuelBurnDuration(fuel.id, fuel.data));
-                    this.container.setSlot("fuelSlot", fuel.id, fuel.count-1, fuel.data, fuel.extra);
+                    let c = fuel.count - 1;
+                    if (c)
+                        this.container.setSlot("fuelSlot", fuel.id, c, fuel.data, fuel.extra);
+                    else
+                        this.container.setSlot("fuelSlot", 0, 0, 0);
+                }else{
+                    this.disable();
                 }
             }
         }
+
+        this.container.setScale("fuelScale", this.data.currentDuration / this.data.duration || 0);
         
-        this.container.setScale("fuleScale", this.data.currentDuration / this.data.duration);
-        this.container.sendChanges();
+        super.tick();
     }
 
-    public setBurnDuration(duration:number){
-        this.defaultValues.currentDuration = this.data.duration = duration;
+    public setBurnDuration(duration: number) {
+        this.data.currentDuration = this.data.duration = duration;
     }
 }
 

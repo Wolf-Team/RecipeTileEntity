@@ -19,7 +19,7 @@ namespace RecipeTE {
 
     type WorkbenchList = { [sID: string]: Workbench };
     export type WorkbenchInfo = {
-        window: UI.IWindow;
+        window: Windows;
         columns: number;
         rows?: number;
         input?: string[] | string;
@@ -30,7 +30,7 @@ namespace RecipeTE {
 
     export class Workbench implements WorkbenchInfo {
         private sID: string;
-        private _window: UI.IWindow;
+        private _window: Windows;
         private _columns: number;
         private _rows: number = 1;
         private _countSlot: number;
@@ -43,7 +43,7 @@ namespace RecipeTE {
         get countSlot(): number {
             return this._countSlot;
         }
-        get window(): UI.IWindow {
+        get window(): Windows {
             return this._window;
         }
         get columns(): number {
@@ -219,17 +219,19 @@ namespace RecipeTE {
             return this.recipes.find((recipe: Recipe) => {
                 let select: boolean = false;
                 if (Array.isArray(recipe.mask)) {
-                    let iLength: number = this.rows - recipe.mask.length,
-                        jLength: number = this.cols - recipe.mask[0].length,
-                        iOffset: number = 0,
-                        jOffset: number = 0;
+                    let rowLength: number = this.rows - recipe.mask.length,
+                        colLength: number = this.cols - recipe.mask[0].length,
+                        rowOffset: number = 0,
+                        colOffset: number = 0;
 
-                    for (let i = 0; i < this.rows; i++) {
-                        for (let j = 0; j < this.cols; j++) {
-                            if (i > iLength && !select) return false;
+                    for (let row = 0; row < this.rows; row++) {
+                        if (row > rowLength && !select) return false;
+                        for (let col = 0; col < this.cols; col++) {
 
-                            let input = inputs[i * this.cols + j];
-                            if (j > jLength && !select)
+                            if (row > rowLength && !select) return false;
+                            let input = inputs[row * this.cols + col];
+
+                            if (col > colLength && !select)
                                 if (input.id != RecipeTE.AIR_ITEM.id)
                                     return false;
 
@@ -239,25 +241,25 @@ namespace RecipeTE {
                                     ingredient.data = -1;
 
                                 if (ingredient.id == input.id && (ingredient.data == -1 || ingredient.data == input.data)) {
-                                    iOffset = i;
-                                    jOffset = j;
+                                    rowOffset = row;
+                                    colOffset = col;
                                     select = true;
                                 } else if (input.id != 0) {
                                     return false;
                                 }
                             } else {
                                 let ingredient = RecipeTE.AIR_ITEM;
-                                let row = recipe.mask[i - iOffset];
-                                if (row) {
-                                    let col = row[j - jOffset];
-                                    if (col)
-                                        ingredient = recipe.ingredients[col];
+                                let _row = recipe.mask[row - rowOffset];
+                                if (_row) {
+                                    let _col = _row[col - colOffset];
+                                    if (_col)
+                                        ingredient = recipe.ingredients[_col];
                                 }
                                 if (input.id != ingredient.id) {
                                     if (recipe.ingredients[recipe.mask[0][0]].id == 0) {
                                         select = false;
-                                        i = iOffset;
-                                        j = jOffset;
+                                        row = rowOffset;
+                                        col = colOffset;
                                     } else {
                                         return false;
                                     }

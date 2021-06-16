@@ -1,6 +1,5 @@
 .vscode/.ropeproject
-output/*
-!output/library
+output
 !.idea/runConfigurations
 **/tsconfig.json
 

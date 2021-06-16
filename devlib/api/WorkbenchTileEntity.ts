@@ -4,7 +4,7 @@ namespace RecipeTE {
         workbench: Workbench;
         useNetworkItemContainer: true;
         //TileEntity
-        getScreenByName: (name: string) => UI.IWindow;
+        getScreenByName: (name: string) => Windows;
         getScreenName: (player: number, coords: Vector) => string;
     }
 
@@ -82,6 +82,8 @@ namespace RecipeTE {
                 });
         }
 
+        public getInputSlots(slotName: string, item: ItemInstance): ItemInstance[];
+        public getInputSlots(): ItemInstance[]
         public getInputSlots(slotName?: string, item?: ItemInstance): ItemInstance[] {
             let slots: ItemInstance[] = [];
 
@@ -101,6 +103,8 @@ namespace RecipeTE {
             return this.container.getSlot(this.workbench.output);
         }
 
+        public validRecipe(slotName: string, item: ItemInstance): void;
+        public validRecipe(): void;
         public validRecipe(slotName?: string, item?: ItemInstance): void {
             if (!this.isEnabled()) {
                 this.currentRecipe = null;
@@ -143,7 +147,7 @@ namespace RecipeTE {
         public getScreenName(): string {
             return "main";
         }
-        public getScreenByName(): UI.IWindow {
+        public getScreenByName(): Windows {
             return this.workbench.window;
         }
 

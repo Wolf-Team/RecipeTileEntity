@@ -1,8 +1,8 @@
 # declaration
 
-header.js
+header.ts
 
 api/*.ts
 !api/*.dev.ts
 
-footer.js
+footer.ts

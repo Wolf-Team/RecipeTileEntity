@@ -46,3 +46,5 @@ LIBRARY({
     api: "CoreEngine",
     shared: true
 });
+
+type Windows = UI.Window | UI.StandardWindow | UI.StandartWindow | UI.TabbedWindow;

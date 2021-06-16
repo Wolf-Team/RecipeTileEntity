@@ -1,15 +1,3 @@
-header.js
+header.ts
 
-# TypeScript code
-# typescript/*.ts
-## Workbench
-typescript/workbench.ts
-## Furnace
-typescript/furnace.ts
-
-# JavaScript code
-# javascript/*.js
-## Workbench
-# javascript/workbench.js
-## Furnace
-# javascript/furnace.js
+workbenches/*.ts

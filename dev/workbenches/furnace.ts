@@ -36,12 +36,12 @@ var Furnace = new UI.StandartWindow({
         "myInputSlot": {
             type: "slot",
             x: 530, y: 110,
-            scale: 4
+            size: 60
         },
         "myOutputSlot": {
             type: "slot",
             x: 698, y: 170,
-            scale: 4
+            size: 60
         },
         "timerScale": {
             type: "scale",
@@ -54,7 +54,7 @@ var Furnace = new UI.StandartWindow({
         "fuelSlot": {
             type: "slot",
             x: 530, y: 170 + 16 * 4,
-            scale: 4
+            size: 60
         },
         "fuelScale": {
             type: "scale",
@@ -100,14 +100,14 @@ class CustomFurnace extends RecipeTE.TimerWorkbenchTileEntity {
                         this.container.setSlot("fuelSlot", fuel.id, c, fuel.data, fuel.extra);
                     else
                         this.container.setSlot("fuelSlot", 0, 0, 0);
-                }else{
+                } else {
                     this.disable();
                 }
             }
         }
 
         this.container.setScale("fuelScale", this.data.currentDuration / this.data.duration || 0);
-        
+
         super.tick();
     }
 
@@ -125,6 +125,6 @@ RecipeTE.registerWorkbench("customFurnace", {
     time: 5 * 20
 });
 RecipeTE.addRecipe("customFurnace", { id: 280 }, [{ id: 5 }]);
-RecipeTE.addRecipe("customFurnace", { id: 281 }, [{ id: 1 }] /*, .2 */);
+RecipeTE.addRecipe("customFurnace", { id: 281 }, [{ id: 1 }]);
 
 RecipeTE.registerTileEntity(BlockID["Furnace"], new CustomFurnace("customFurnace"))

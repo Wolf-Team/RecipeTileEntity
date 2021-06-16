@@ -1,21 +1,20 @@
 {
     "info": {
-        "name": "RecipeTELib",
-        "description": "",
+        "name": "RecipeTileEntity Demo",
+        "description": "A library that simplifies the creation of workbenches and furnaces.",
         "author": "WolfTeam",
         "version": "1.0",
         "icon": "icon.png",
         "api": "CoreEngine"
     },
     "resources": [{
-        "path":"assets/res",
-        "type":"resource_directory"
-    },{
-        "path":"assets/gui",
-        "type":"gui"
+        "path": "assets/res",
+        "type": "resource_directory"
+    }, {
+        "path": "assets/gui",
+        "type": "gui"
     }],
-    "sources": [
-        {
+    "sources": [{
             "source": "dev",
             "target": "main.js",
             "type": "main",
@@ -39,5 +38,8 @@
         }
     ],
     "compile": [],
-    "additional": []
+    "additional": [{
+        "source": "root/*",
+        "targetDir": "./"
+    }]
 }

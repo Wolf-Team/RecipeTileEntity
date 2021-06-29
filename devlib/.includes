@@ -2,7 +2,6 @@
 
 header.ts
 
-api/*.ts
-!api/*.dev.ts
+api/**/*.ts
 
 footer.ts

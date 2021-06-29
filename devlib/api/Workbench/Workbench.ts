@@ -1,113 +1,23 @@
-/// <reference path="Errors.ts" />
-
 namespace RecipeTE {
-    export type RecipeItem = { id: number; count?: number; data?: number; }
-    export type IngredientsList = { [char_mask: string]: RecipeItem };
+    export class Workbench {
+        public readonly cols: number;
+        public readonly rows: number = 1;
+        public readonly countSlot: number = 1;
+        private _recipes: Recipe[] = [];
 
-    interface CraftFunction {
-        (container: ItemContainer, workbench: Workbench, tileEntity: WorkbenchPrototype): void;
-    }
-    export type Recipe = {
-        result: RecipeItem;
-        mask: string[] | string;
-        ingredients: IngredientsList;
-        craft: CraftFunction
-    }
-
-
-    export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
-
-    type WorkbenchList = { [sID: string]: Workbench };
-    export type WorkbenchInfo = {
-        window: Windows;
-        columns: number;
-        rows?: number;
-        input?: string[] | string;
-        output?: string;
-        scale?: string;
-        time?: number;
-    }
-
-    export class Workbench implements WorkbenchInfo {
-        private sID: string;
-        private _window: Windows;
-        private _columns: number;
-        private _rows: number = 1;
-        private _countSlot: number;
-        private _input: string[] | string = "inputSlot";
-        private _output: string = "outputSlot";
-        private _scale: string = "progressScale";
-        private _time: number = 0;
-        private recipes: Recipe[] = [];
-
-        get countSlot(): number {
-            return this._countSlot;
-        }
-        get window(): Windows {
-            return this._window;
-        }
-        get columns(): number {
-            return this._columns;
-        }
-        get cols(): number {
-            return this._columns;
-        }
-        get rows(): number {
-            return this._rows;
-        }
-        get time(): number {
-            return this._time;
-        }
-        get input(): string[] | string {
-            return this._input;
-        }
-        get output(): string {
-            return this._output;
-        }
-        get scale(): string {
-            return this._scale;
-        }
-
-        constructor(sID: string, info: WorkbenchInfo) {
-            this.sID = sID;
-            this._window = info.window;
-
-            if (info.columns < 1)
-                throw new RangeError(`"info.columns" must be > 0.`);
-            this._columns = info.columns;
-
-            if (info.rows != undefined) {
-                if (info.rows < 1)
-                    throw new RangeError(`"info.rows" must be > 0.`);
-
-                this._rows = info.rows || 1;
+        constructor(info: WorkbenchInfo);
+        constructor(cols: number);
+        constructor(info: WorkbenchInfo | number) {
+            if (typeof info == "number") {
+                this.countSlot = this.cols = info;
+            } else {
+                this.cols = info.columns;
+                if (info.rows) this.rows = info.rows;
+                this.countSlot = this.cols * this.rows;
             }
-
-            this._countSlot = this._columns * this._rows;
-
-            if (info.input) {
-                if (Array.isArray(info.input) && info.input.length != this.countSlot)
-                    throw new RangeError(`Length "info.input" mast be = ${this.countSlot}(columns * rows).`);
-
-                this._input = info.input;
-            }
-
-            if (info.output != undefined)
-                this._output = info.output;
-
-
-            if (info.scale != undefined)
-                this._scale = info.scale;
-
-            if (info.time != undefined) {
-                if (info.time < 0)
-                    throw new RangeError(`"info.time" must be >= 0.`);
-                this._time = info.time;
-            }
-
         }
 
-        public addRecipe(result: RecipeItem, ingredients: RecipeItem[], craftFunction?: CraftFunction): Workbench {
+        public addRecipe(result: RecipeItem, ingredients: RecipeItem[], craftFunction: CraftFunction = defaultCraftFunction): this {
             if (result.count === undefined) result.count = 1;
             if (result.data === undefined) result.data = 0;
 
@@ -121,33 +31,20 @@ namespace RecipeTE {
 
                 count += item.count;
                 outputIngredients[`${item.id}:${item.data}`] = item;
-            })
-
-            for (let i = ingredients.length - 1; i >= 1; i--) {
-                if (ingredients[i].count === undefined)
-                    ingredients[i].count = 1;
-                if (ingredients[i].data === undefined)
-                    ingredients[i].data = -1;
-
-                count += ingredients[i].count;
-            }
+            });
 
             if (count > this.countSlot)
-                throw new RangeError(`Ingredients must be <= ${this.countSlot}`);
+                throw new RangeError(`Ingredients must be <= ${this.countSlot}(columns * rows)`);
 
-            var recipe: Recipe = {
+            this._recipes.push({
                 result: result,
-                mask: null,
-                ingredients: outputIngredients,
-                craft: craftFunction || defaultCraftFunction
-            };
-
-            this.recipes.push(recipe)
-
+                ingredients: null,
+                craft: craftFunction,
+                mask: null
+            });
             return this;
         }
-
-        public addShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craftFunction?: CraftFunction): Workbench {
+        public addShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craftFunction: CraftFunction = defaultCraftFunction): this {
             if (result.count === undefined) result.count = 1;
             if (result.data === undefined) result.data = 0;
 
@@ -168,8 +65,8 @@ namespace RecipeTE {
 
                 let l = mask[0].length;
 
-                if (l > this.columns)
-                    throw new RangeError(`Length of the mask line must be <= ${this.columns}`);
+                if (l > this.cols)
+                    throw new RangeError(`Length of the mask line must be <= ${this.cols}`);
                 else if (l < 1)
                     throw new RangeError(`Length of the mask line must be >= 1`);
 
@@ -200,23 +97,20 @@ namespace RecipeTE {
                         throw new SyntaxError("Unknown ingredient " + mask[i]);
             }
 
-            var recipe: Recipe = {
+            this._recipes.push({
                 result: result,
                 mask: mask,
                 ingredients: ingredients,
-                craft: craftFunction || defaultCraftFunction
-            };
-
-            this.recipes.push(recipe)
+                craft: craftFunction
+            })
             return this;
         }
 
-        public getRecipes(): Recipe[] {
-            return this.recipes;
-        }
-
         public getRecipe(inputs: ItemInstance[]): Recipe {
-            return this.recipes.find((recipe: Recipe) => {
+            if (inputs.length != this.countSlot)
+                throw new RangeError("Length 'inputs' != " + this.countSlot);
+
+            return this._recipes.find((recipe: Recipe) => {
                 let select: boolean = false;
                 if (Array.isArray(recipe.mask)) {
                     let rowLength: number = this.rows - recipe.mask.length,
@@ -318,79 +212,8 @@ namespace RecipeTE {
                 }
 
                 return select;
-            }, this)
+            }, this);
         }
 
-        public hasInputSlot(nameSlot: string): boolean {
-            if (Array.isArray(this._input))
-                return this._input.indexOf(nameSlot) != -1
-
-            if (!nameSlot.startsWith(this._input))
-                return false;
-
-            let i = parseInt(nameSlot.replace(this._input, ""));
-            if (isNaN(i))
-                return false;
-
-            return i >= 0 && i < this.countSlot;
-        }
-
-        public toString(): string {
-            return this.sID;
-        }
-
-        private static workbenches: WorkbenchList = {};
-        public static isRegister(workbench: Workbench | string): boolean {
-            if (workbench instanceof Workbench)
-                workbench = workbench.sID;
-
-            return this.workbenches[workbench] != undefined;
-        }
-        public static registerWorkbench(workbench: Workbench): void {
-            if (this.isRegister(workbench))
-                throw new RegisterError(`Workbench with sID "${workbench.sID}" already has been registered.`);
-
-            this.workbenches[workbench.sID] = workbench;
-        }
-        public static getWorkbench(sID: string): Workbench {
-            if (!this.isRegister(sID))
-                throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);
-
-            return this.workbenches[sID];
-        }
-    }
-
-    function defaultCraftFunction(container: ItemContainer, workbench: Workbench): void {
-        for (var i = 0; i < workbench.countSlot; i++) {
-            var input_slot_name: string;
-            if (Array.isArray(workbench.input))
-                input_slot_name = workbench.input[i]
-            else
-                input_slot_name = workbench.input + i;
-
-            var slot: ItemInstance = container.getSlot(input_slot_name);
-            if (slot.count > 0) {
-                slot.count--;
-
-                if (slot.count == 0)
-                    slot.data = slot.id = slot.count;
-            }
-            container.setSlot(input_slot_name, slot.id, slot.count, slot.data, slot.extra);
-        }
-    }
-
-    export var isRegister = Workbench.isRegister;
-    export function registerWorkbench(sID: string, info: WorkbenchInfo): Workbench {
-        let workbench = new Workbench(sID, info);
-        Workbench.registerWorkbench(workbench);
-        return workbench;
-    }
-
-    export function addRecipe(sID: string, result: RecipeItem, ingredients: RecipeItem[], craft?: CraftFunction): void {
-        Workbench.getWorkbench(sID).addRecipe(result, ingredients, craft)
-    }
-    export function addShapeRecipe(sID: string, result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craft?: CraftFunction): void {
-        Workbench.getWorkbench(sID).addShapeRecipe(result, mask, ingredients, craft)
     }
 }
-//throw new RegisterError(`Workbench with sID "${sID}" yet not been registered.`);

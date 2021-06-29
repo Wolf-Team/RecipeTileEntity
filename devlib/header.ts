@@ -14,7 +14,7 @@
 /*ChangeLog:
     v.3.0
         - Rename
-        - Migrate TypeScript
+        - Rewrite in TypeScript
         - Support Multiplayer
     v.2.1
         - Fix errors
@@ -48,3 +48,8 @@ LIBRARY({
 });
 
 type Windows = UI.Window | UI.StandardWindow | UI.StandartWindow | UI.TabbedWindow;
+type Dict<T = any> = { [key: string]: T } | {};
+
+namespace RecipeTE {
+    export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
+}

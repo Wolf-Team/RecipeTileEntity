@@ -38,7 +38,7 @@ namespace RecipeTE {
 
             this._recipes.push({
                 result: result,
-                ingredients: null,
+                ingredients: outputIngredients,
                 craft: craftFunction,
                 mask: null
             });

@@ -56,16 +56,17 @@ var Workbench_Grid: UI.StandardWindow = new UI.StandardWindow({
 const MyWorkbench = new RecipeTE.Workbench({
     columns: 4,
     rows: 4
-}).addShapeRecipe(
-    { id: 280, count: 1 },
-    [
-        "aa",
-        "aa"
-    ],
-    {
-        a: { id: 5 }
-    }
-)
+})
+    .addShapeRecipe(
+        { id: 280, count: 1 },
+        [
+            "aa",
+            "aa"
+        ],
+        {
+            a: { id: 5 }
+        }
+    )
     .addShapeRecipe(
         { id: 1 },
         "aaaa",

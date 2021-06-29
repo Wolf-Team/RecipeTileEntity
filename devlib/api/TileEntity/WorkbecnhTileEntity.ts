@@ -54,8 +54,7 @@ namespace RecipeTE {
 
         private takeResult(container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number): number {
             for (let i = 0; i < amount; i++)
-                // this.currentRecipe.craft(container, this.workbench, this);
-                this.currentRecipe.craft(container, this.workbench);
+                this.currentRecipe.craft(container, this.workbench, this);
 
             return amount;
         }
@@ -110,9 +109,6 @@ namespace RecipeTE {
 
         public addGlobalAddTransferPolicy = this.GlobalAddPolicy.add.bind(this.GlobalAddPolicy);
         public addGlobalGetTransferPolicy = this.GlobalGetPolicy.add.bind(this.GlobalGetPolicy);
-
-
-
 
         private getItems(slotName: string, item: ItemInstance): ItemInstance[];
         private getItems(): ItemInstance[]
@@ -205,10 +201,4 @@ namespace RecipeTE {
             return this.data.enabled;
         }
     }
-
-    // export function registerTileEntity(BlockID: number, prototype: WorkbenchPrototype): void {
-    //     if (prototype instanceof WorkbenchTileEntity)
-    //         prototype.registerTileEntity(BlockID);
-
-    // }
 }

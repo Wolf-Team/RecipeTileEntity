@@ -56,7 +56,7 @@ class MyWorkbenchTileEntity extends RecipeTE.WorkbenchTileEntity {
 
 TileEntity.registerPrototype (BlockID ["Workbench_Grid"], new MyWorkbenchTileEntity(MyWorkbench));
 ```
-
+**For use in JavaScript, you can use the [extends](https://github.com/Wolf-Team/extends) library**
 ## Older versions
 * [RecipeTileEntityLib 2.1](https://github.com/Wolf-Team/Libraries/blob/master/RecipeTileEntityLib.js)
 * [RecipeTileEntityLib 2.0](https://github.com/Wolf-Team/Libraries/blob/e88db1ef28352867ed661e4ae3589e2a5c952aca/RecipeTileEntityLib.js)

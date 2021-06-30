@@ -69,7 +69,7 @@ var Furnace = new UI.StandartWindow({
 const MyFurnace = new RecipeTE.TimerWorkbench({
     columns: 1,
     timer: 5 * 20
-})
+}, { multiply: 1 })
     .addRecipe({ id: 280 }, [{ id: 5 }])
     .addRecipe({ id: 281 }, [{ id: 1 }], { multiply: 2 });
 

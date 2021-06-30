@@ -9,8 +9,8 @@ namespace RecipeTE {
     export class TimerWorkbench<T extends RecipeDataTimer> extends Workbench<T>{
         public readonly timer: number;
 
-        constructor(info: TimerWorkbenсhInfo) {
-            super(info);
+        constructor(info: TimerWorkbenсhInfo, defaultRecipeData:T) {
+            super(info, defaultRecipeData);
             this.timer = info.timer;
         }
 

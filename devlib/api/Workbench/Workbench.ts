@@ -8,10 +8,11 @@ namespace RecipeTE {
         public readonly rows: number = 1;
         public readonly countSlot: number = 1;
         protected _recipes: Recipe<RecipeData>[] = [];
+        public readonly defaultRecipeData: RecipeData;
 
-        constructor(info: WorkbenchInfo);
-        constructor(cols: number);
-        constructor(info: WorkbenchInfo | number) {
+        constructor(info: WorkbenchInfo, defaultRecipeData?: RecipeData);
+        constructor(cols: number, defaultRecipeData?: RecipeData);
+        constructor(info: WorkbenchInfo | number, defaultRecipeData: RecipeData = null) {
             if (typeof info == "number") {
                 this.countSlot = this.cols = info;
             } else {
@@ -19,6 +20,17 @@ namespace RecipeTE {
                 if (info.rows) this.rows = info.rows;
                 this.countSlot = this.cols * this.rows;
             }
+            this.defaultRecipeData = defaultRecipeData;
+        }
+
+        private getDataForRecipe(data: RecipeData): RecipeData {
+            let data2 = JSON.parse(JSON.stringify(this.defaultRecipeData));
+            if (data) {
+                if (typeof data2 == "object")
+                    for(let i in data)
+                        data2[i] = data[i];
+            }
+            return data2;
         }
 
         protected getObjRecipe(result: RecipeItem, ingredients: RecipeItem[], data?: RecipeData, craftFunction: CraftFunction = defaultCraftFunction): Recipe {
@@ -40,12 +52,14 @@ namespace RecipeTE {
             if (count > this.countSlot)
                 throw new RangeError(`Ingredients must be <= ${this.countSlot}(columns * rows)`);
 
+
+
             return {
                 result: result,
                 ingredients: outputIngredients,
                 craft: craftFunction,
                 mask: null,
-                data: data || null
+                data: this.getDataForRecipe(data)
             };
         }
         protected getObjShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, data: RecipeData, craftFunction: CraftFunction = defaultCraftFunction): Recipe {
@@ -106,7 +120,7 @@ namespace RecipeTE {
                 mask: mask,
                 ingredients: ingredients,
                 craft: craftFunction,
-                data: data || null
+                data: this.getDataForRecipe(data)
             };
         }
 

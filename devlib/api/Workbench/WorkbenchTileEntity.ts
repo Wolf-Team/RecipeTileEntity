@@ -32,14 +32,14 @@ namespace RecipeTE {
 
     type WorkbenchTileEntityData = { enabled?: boolean, [key: string]: any };
 
-    export abstract class WorkbenchTileEntity implements TileEntity.TileEntityPrototype {
-        private workbench: Workbench;
-        private currentRecipe: Recipe;
-        private container: ItemContainer;
+    export abstract class WorkbenchTileEntity<Data = any> implements TileEntity.TileEntityPrototype {
+        protected workbench: Workbench<Data>;
+        protected currentRecipe: Recipe<Data>;
+        protected container: ItemContainer;
         public readonly useNetworkItemContainer: true = true;
 
         public defaultValues: WorkbenchTileEntityData;
-        private data: WorkbenchTileEntityData;
+        protected data: WorkbenchTileEntityData;
 
         constructor(workbench: Workbench, state: boolean = true) {
             this.setWorkbench(workbench);
@@ -52,7 +52,7 @@ namespace RecipeTE {
             this.workbench = workbench;
         }
 
-        private takeResult(container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number): number {
+        protected takeResult(container: ItemContainer, name: string, id: number, amount: number, data: number, extra: ItemExtraData, playerUid: number): number {
             for (let i = 0; i < amount; i++)
                 this.currentRecipe.craft(container, this.workbench, this);
 
@@ -107,12 +107,12 @@ namespace RecipeTE {
                 });
         }
 
-        public addGlobalAddTransferPolicy = this.GlobalAddPolicy.add.bind(this.GlobalAddPolicy);
-        public addGlobalGetTransferPolicy = this.GlobalGetPolicy.add.bind(this.GlobalGetPolicy);
+        public readonly addGlobalAddTransferPolicy = this.GlobalAddPolicy.add.bind(this.GlobalAddPolicy);
+        public readonly addGlobalGetTransferPolicy = this.GlobalGetPolicy.add.bind(this.GlobalGetPolicy);
 
-        private getItems(slotName: string, item: ItemInstance): ItemInstance[];
-        private getItems(): ItemInstance[]
-        private getItems(slotName?: string, item?: ItemInstance): ItemInstance[] {
+        protected getItems(slotName: string, item: ItemInstance): ItemInstance[];
+        protected getItems(): ItemInstance[]
+        protected getItems(slotName?: string, item?: ItemInstance): ItemInstance[] {
             let slots: ItemInstance[] = [];
             const slotsName = this.getInputSlots();
 
@@ -129,9 +129,9 @@ namespace RecipeTE {
             return slots;
         }
 
-        private validRecipe(slotName: string, item: ItemInstance): void;
-        private validRecipe(): void;
-        private validRecipe(slotName?: string, item?: ItemInstance): void {
+        protected validRecipe(slotName: string, item: ItemInstance): void;
+        protected validRecipe(): void;
+        protected validRecipe(slotName?: string, item?: ItemInstance): void {
             const outputSlotName = this.getOutputSlot();
             if (!this.isEnabled()) {
                 this.currentRecipe = null;

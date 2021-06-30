@@ -1,5 +1,5 @@
-namespace RecipeTE{
-    export interface WorkbenchInfo{
+namespace RecipeTE {
+    export interface WorkbenchInfo {
         columns: number;
         rows?: number;
         input?: string[] | string;

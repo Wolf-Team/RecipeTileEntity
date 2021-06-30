@@ -1,9 +1,13 @@
+/// <reference path="WorkbenchInfo.ts" />
+
+
 namespace RecipeTE {
-    export class Workbench {
+
+    export class Workbench<RecipeData = any> {
         public readonly cols: number;
         public readonly rows: number = 1;
         public readonly countSlot: number = 1;
-        private _recipes: Recipe[] = [];
+        protected _recipes: Recipe<RecipeData>[] = [];
 
         constructor(info: WorkbenchInfo);
         constructor(cols: number);
@@ -17,7 +21,7 @@ namespace RecipeTE {
             }
         }
 
-        public addRecipe(result: RecipeItem, ingredients: RecipeItem[], craftFunction: CraftFunction = defaultCraftFunction): this {
+        protected getObjRecipe(result: RecipeItem, ingredients: RecipeItem[], data?: RecipeData, craftFunction: CraftFunction = defaultCraftFunction): Recipe {
             if (result.count === undefined) result.count = 1;
             if (result.data === undefined) result.data = 0;
 
@@ -36,15 +40,15 @@ namespace RecipeTE {
             if (count > this.countSlot)
                 throw new RangeError(`Ingredients must be <= ${this.countSlot}(columns * rows)`);
 
-            this._recipes.push({
+            return {
                 result: result,
                 ingredients: outputIngredients,
                 craft: craftFunction,
-                mask: null
-            });
-            return this;
+                mask: null,
+                data: data || null
+            };
         }
-        public addShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, craftFunction: CraftFunction = defaultCraftFunction): this {
+        protected getObjShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, data: RecipeData, craftFunction: CraftFunction = defaultCraftFunction): Recipe {
             if (result.count === undefined) result.count = 1;
             if (result.data === undefined) result.data = 0;
 
@@ -97,12 +101,22 @@ namespace RecipeTE {
                         throw new SyntaxError("Unknown ingredient " + mask[i]);
             }
 
-            this._recipes.push({
+            return {
                 result: result,
                 mask: mask,
                 ingredients: ingredients,
-                craft: craftFunction
-            })
+                craft: craftFunction,
+                data: data || null
+            };
+        }
+
+        public addRecipe(result: RecipeItem, ingredients: RecipeItem[], data?: RecipeData, craftFunction: CraftFunction = defaultCraftFunction): this {
+            this._recipes.push(this.getObjRecipe(result, ingredients, data, craftFunction));
+            return this;
+        }
+
+        public addShapeRecipe(result: RecipeItem, mask: string[] | string, ingredients: IngredientsList, data?: RecipeData, craftFunction: CraftFunction = defaultCraftFunction): this {
+            this._recipes.push(this.getObjShapeRecipe(result, mask, ingredients, data, craftFunction));
             return this;
         }
 
@@ -214,6 +228,5 @@ namespace RecipeTE {
                 return select;
             }, this);
         }
-
     }
 }

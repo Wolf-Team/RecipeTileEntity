@@ -8,14 +8,15 @@ namespace RecipeTE {
     export interface CraftFunction {
         (container: ItemContainer, workbench: Workbench, TE: WorkbenchTileEntity): void;
     }
-    export interface Recipe {
+    export interface Recipe<Data = any> {
         result: RecipeItem;
         mask: string[] | string;
         ingredients: IngredientsList;
         craft: CraftFunction;
+        data: Data;
     }
 
-    export function defaultCraftFunction(container: ItemContainer, workbench: Workbench, TE: WorkbenchTileEntity): void {
+    export function defaultCraftFunction<Data>(container: ItemContainer, workbench: Workbench, TE: WorkbenchTileEntity): void {
         for (let i = 0; i < workbench.countSlot; i++) {
             let input_slot_name = TE.getInputSlots();
             if (Array.isArray(input_slot_name))

@@ -66,67 +66,67 @@ var Furnace = new UI.StandartWindow({
     }
 });
 
-// class CustomFurnace extends RecipeTE.TimerWorkbenchTileEntity {
-//     constructor(sID: string | RecipeTE.Workbench) {
-//         super(sID, false);
-//         this.defaultValues.duration = 0;
-//         this.defaultValues.currentDuration = 0;
-//     }
+const MyFurnace = new RecipeTE.TimerWorkbench({
+    columns: 1,
+    timer: 5 * 20
+})
+    .addRecipe({ id: 280 }, [{ id: 5 }])
+    .addRecipe({ id: 281 }, [{ id: 1 }], { multiply: 2 });
 
-//     public init() {
-//         super.init();
+class MyFurnaceTileEntity extends RecipeTE.TimerWorkbenchTileEntity {
+    constructor(workbench: RecipeTE.Workbench) {
+        super(workbench, false);
+        this.defaultValues.duration = 0;
+        this.defaultValues.currentDuration = 0;
+    }
 
-//         this.container.setSlotAddTransferPolicy("fuelSlot", function (container, name, id, amount, data) {
-//             var self: CustomFurnace = container.getParent();
-//             let dur = Recipes.getFuelBurnDuration(id, data);
-//             if (dur > 0) {
-//                 self.enable();
-//                 return amount;
-//             }
-//             return 0;
-//         });
-//     }
+    getScreenName(): string { return "main"; }
+    getScreenByName(): Windows { return Furnace; }
+    getInputSlots(): string[] { return ["myInputSlot"]; }
+    getOutputSlot(): string { return "myOutputSlot"; }
+    getScale(): string { return "timerScale"; }
 
-//     public tick() {
-//         if (this.isEnabled()) {
-//             if (this.data.currentDuration) {
-//                 this.data.currentDuration--;
-//             } else {
-//                 let fuel = this.container.getSlot("fuelSlot");
-//                 if (fuel.count != 0) {
-//                     this.setBurnDuration(Recipes.getFuelBurnDuration(fuel.id, fuel.data));
-//                     let c = fuel.count - 1;
-//                     if (c)
-//                         this.container.setSlot("fuelSlot", fuel.id, c, fuel.data, fuel.extra);
-//                     else
-//                         this.container.setSlot("fuelSlot", 0, 0, 0);
-//                 } else {
-//                     this.disable();
-//                 }
-//             }
-//         }
+    public init() {
+        super.init();
 
-//         this.container.setScale("fuelScale", this.data.currentDuration / this.data.duration || 0);
+        this.container.setSlotAddTransferPolicy("fuelSlot", function (container, name, id, amount, data) {
+            var self: MyFurnaceTileEntity = container.getParent();
+            let dur = Recipes.getFuelBurnDuration(id, data);
+            if (dur > 0) {
+                self.enable();
+                return amount;
+            }
+            return 0;
+        });
+    }
 
-//         super.tick();
-//     }
+    public tick() {
+        if (this.isEnabled()) {
+            if (this.data.currentDuration) {
+                this.data.currentDuration--;
+            } else {
+                let fuel = this.container.getSlot("fuelSlot");
+                if (fuel.count != 0) {
+                    this.setBurnDuration(Recipes.getFuelBurnDuration(fuel.id, fuel.data));
+                    let c = fuel.count - 1;
+                    if (c)
+                        this.container.setSlot("fuelSlot", fuel.id, c, fuel.data, fuel.extra);
+                    else
+                        this.container.setSlot("fuelSlot", 0, 0, 0);
+                } else {
+                    this.disable();
+                }
+            }
+        }
 
-//     public setBurnDuration(duration: number) {
-//         this.data.currentDuration = this.data.duration = duration;
-//     }
-// }
+        this.container.setScale("fuelScale", this.data.currentDuration / this.data.duration || 0);
 
-// RecipeTE.registerWorkbench("customFurnace", {
-//     window: Furnace,
-//     columns: 1,
-//     input: ["myInputSlot"],
-//     output: "myOutputSlot",
-//     scale: "timerScale",
-//     time: 5 * 20
-// });
-// RecipeTE.addRecipe("customFurnace", { id: 280 }, [{ id: 5 }]);
-// RecipeTE.addRecipe("customFurnace", { id: 281 }, [{ id: 1 }], {
-//     multiply: 1
-// });
+        super.tick();
+    }
 
-// RecipeTE.registerTileEntity(BlockID["Furnace"], new CustomFurnace("customFurnace"))
+    public setBurnDuration(duration: number) {
+        this.data.currentDuration = this.data.duration = duration;
+    }
+}
+
+TileEntity.registerPrototype(BlockID["Furnace"], new MyFurnaceTileEntity(MyFurnace));

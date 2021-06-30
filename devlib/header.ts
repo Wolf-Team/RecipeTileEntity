@@ -16,6 +16,7 @@
         - Rename
         - Rewrite in TypeScript
         - Support Multiplayer
+        - Remove integration with RecipeViewer
     v.2.1
         - Fix errors
         - Shared
@@ -52,7 +53,4 @@ type Dict<T = any> = { [key: string]: T } | {};
 
 namespace RecipeTE {
     export const AIR_ITEM: RecipeItem = { id: 0, count: 0 };
-}
-Array.prototype.includes = function (search, fromI) {
-    return this.indexOf(search, fromI) != -1;
 }

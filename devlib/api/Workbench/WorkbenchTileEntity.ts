@@ -179,7 +179,7 @@ namespace RecipeTE {
         public hasInputSlot(name: string) {
             const slots = this.getInputSlots();
             if (Array.isArray(slots))
-                return slots.includes(name);
+                return slots.indexOf(name) != -1;
 
             const i = parseInt(name.match(new RegExp(slots + "([0-9]+)"))[1]);
             return i >= 0 && i < this.workbench.countSlot;

@@ -46,7 +46,10 @@ namespace RecipeTE {
                     item.data = -1;
 
                 count += item.count;
-                outputIngredients[`${item.id}:${item.data}`] = item;
+                const key = `${item.id}:${item.data}`;
+                if(!outputIngredients[key]) {
+                    outputIngredients[key] = item;
+                } else outputIngredients[key].count += item.count;
             });
 
             if (count > this.countSlot)

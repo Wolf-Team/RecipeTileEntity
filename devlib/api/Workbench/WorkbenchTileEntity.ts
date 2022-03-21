@@ -156,8 +156,8 @@ namespace RecipeTE {
 
             if (result.id != 0) {
                 count = 0;
-                for (let i = inputs.length - 1; i >= 1 && count != 1; i--)
-                    if ((count == 0 && inputs[i].count != 0) || (count > inputs[i].count))
+                for (let i = inputs.length - 1; i >= 0 && count != 1; i--)
+                    if (inputs[i].count != 0 && (count == 0 || count > inputs[i].count))
                         count = inputs[i].count;
             }
             this.currentRecipe = recipe;

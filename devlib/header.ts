@@ -12,6 +12,8 @@
     VK: https://vk.com/wolf___team
 */
 /*ChangeLog:
+    v.3.0.1
+        - Fixed calculation of the number of crafting results
     v.3.0
         - Rename
         - Rewrite in TypeScript
@@ -43,7 +45,7 @@
 
 LIBRARY({
     name: "RecipeTileEntity",
-    version: 30,
+    version: 301,
     api: "CoreEngine",
     shared: true
 });
